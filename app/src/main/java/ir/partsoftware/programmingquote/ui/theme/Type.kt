@@ -1,34 +1,37 @@
 package ir.partsoftware.programmingquote.ui.theme
 
-import androidx.compose.material3.Typography
+import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import ir.partsoftware.programmingquote.R
 
-// Set of Material typography styles to start with
-val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
-    ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
+internal val Typography = Typography(
+    h1 = TextStyle(
+        fontFamily = FontFamily(Font(R.font.firacode_medium)),
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        fontSize = 55.sp
+    ),
+    subtitle1 = TextStyle(
+        fontFamily = FontFamily(Font(R.font.firacode_bold)),
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp
+    ),
+    body1 = TextStyle(
+        fontFamily = FontFamily(Font(R.font.firacode_medium)),
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp
+    ),
+    button = TextStyle(
+        fontFamily = FontFamily(Font(R.font.firacode_regular)),
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp
+    ),
+    overline = TextStyle(
+        fontFamily = FontFamily(Font(R.font.firacode_light)),
+        fontWeight = FontWeight.Light,
+        fontSize = 12.sp
     )
-    */
 )
