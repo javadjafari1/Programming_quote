@@ -12,9 +12,6 @@ pluginManagement {
                 }
             }
         }
-        google()
-        mavenCentral()
-        gradlePluginPortal()
     }
 }
 dependencyResolutionManagement {
@@ -32,10 +29,8 @@ dependencyResolutionManagement {
                 }
             }
         }
-        google()
-        gradlePluginPortal()
     }
 }
 
-rootProject.name = "Backgroundable"
+rootProject.name = "Programming Quote"
 include(":app")
