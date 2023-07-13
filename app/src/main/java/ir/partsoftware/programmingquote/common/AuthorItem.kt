@@ -21,8 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ir.partsoftware.programmingquote.R
+import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -71,5 +73,18 @@ fun AuthorItem(
                 maxLines = 1,
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun AuthorItemPreview() {
+    ProgrammingQuoteTheme {
+        AuthorItem(
+            authorName = "javad jafari",
+            quotesCount = 34,
+            onItemClick = {}
+        )
+
     }
 }

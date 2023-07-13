@@ -147,7 +147,7 @@ private fun ScreenContent(
 
 @Preview
 @Composable
-fun AuthorsListPreview() {
+private fun AuthorsListPreview() {
     ProgrammingQuoteTheme {
         AuthorsListScreen(onAuthorClicked = {}, openSearch = {})
     }

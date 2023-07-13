@@ -36,12 +36,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ir.partsoftware.programmingquote.R
 import ir.partsoftware.programmingquote.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.common.QuoteItem
+import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 
 @Composable
 fun QuotesListScreen(
@@ -180,5 +182,24 @@ private fun ScreenContent(
                 }
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun QuoteListScreenPreview() {
+    ProgrammingQuoteTheme {
+        QuotesListScreen(name = "Javad jafari", onQuoteClicked = {})
+    }
+}
+
+@Preview
+@Composable
+fun AuthorDetailDialogPreview() {
+    ProgrammingQuoteTheme {
+        AuthorDetailDialog(
+            name = "javad jafari",
+            about = LoremIpsum(30).values.joinToString()
+        ) {}
     }
 }

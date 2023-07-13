@@ -1,16 +1,20 @@
 package ir.partsoftware.programmingquote.common
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.ChipDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FilterChip
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.SelectableChipColors
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -36,4 +40,20 @@ fun PQuotesChip(
         border = border,
         content = content
     )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Preview
+@Composable
+fun PQuoteChipPreview() {
+    ProgrammingQuoteTheme {
+        Column {
+            PQuotesChip(selected = true, onClick = { /*TODO*/ }) {
+                Text(text = "Programmer")
+            }
+            PQuotesChip(selected = false, onClick = { /*TODO*/ }) {
+                Text(text = "Programmer")
+            }
+        }
+    }
 }

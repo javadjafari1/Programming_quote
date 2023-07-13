@@ -18,12 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import ir.partsoftware.programmingquote.R
 import ir.partsoftware.programmingquote.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.core.openUrl
 import ir.partsoftware.programmingquote.core.shareText
+import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 
 
 @Composable
@@ -100,5 +102,13 @@ private fun ScreenContent(
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun QuoteScreenPreview() {
+    ProgrammingQuoteTheme {
+        QuoteScreen(name = "Javad jafari")
     }
 }

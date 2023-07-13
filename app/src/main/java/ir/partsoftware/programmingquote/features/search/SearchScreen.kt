@@ -27,12 +27,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ir.partsoftware.programmingquote.R
 import ir.partsoftware.programmingquote.common.AuthorItem
 import ir.partsoftware.programmingquote.common.PQuotesChip
 import ir.partsoftware.programmingquote.common.QuoteItem
 import ir.partsoftware.programmingquote.core.SearchType
+import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -138,5 +140,13 @@ fun SearchScreen(
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun SearchScreenPreview() {
+    ProgrammingQuoteTheme {
+        SearchScreen(onQuoteClicked = {}, onAuthorClicked = {})
     }
 }
