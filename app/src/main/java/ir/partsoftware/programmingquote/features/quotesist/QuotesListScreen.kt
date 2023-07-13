@@ -10,12 +10,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -34,7 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import ir.partsoftware.programmingquote.R
 
 @Composable
@@ -42,7 +48,8 @@ fun QuotesListScreen(
     name: String,
     onQuoteClicked: (Int) -> Unit
 ) {
-    var isFullImageDisplayed by remember { mutableStateOf(false) }
+    var isFullImageShowing by remember { mutableStateOf(false) }
+    var isInfoDialogShowing by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -57,7 +64,7 @@ fun QuotesListScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { /*TODO open detail dialog*/ }) {
+                    IconButton(onClick = { isInfoDialogShowing = true }) {
                         Icon(
                             imageVector = Icons.Outlined.Info,
                             contentDescription = "info icon"
@@ -70,7 +77,7 @@ fun QuotesListScreen(
                             .padding(start = 16.dp)
                             .size(34.dp)
                             .clip(CircleShape)
-                            .clickable { isFullImageDisplayed = true },
+                            .clickable { isFullImageShowing = true },
                         painter = painterResource(R.drawable.ic_launcher_background),
                         contentDescription = "author's image"
                     )
@@ -87,7 +94,7 @@ fun QuotesListScreen(
                 onQuoteClicked = onQuoteClicked
             )
             AnimatedVisibility(
-                visible = isFullImageDisplayed,
+                visible = isFullImageShowing,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -97,7 +104,7 @@ fun QuotesListScreen(
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
-                            onClick = { isFullImageDisplayed = false }
+                            onClick = { isFullImageShowing = false }
                         )
                 )
                 {
@@ -113,6 +120,46 @@ fun QuotesListScreen(
                     )
                 }
             }
+            if (isInfoDialogShowing) {
+                AuthorDetailDialog(
+                    name = name,
+                    about = LoremIpsum(100).values.joinToString(),
+                    onDismiss = { isInfoDialogShowing = false }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AuthorDetailDialog(
+    name: String,
+    about: String,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colors.surface,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(all = 24.dp)
+                .verticalScroll(rememberScrollState())
+
+        ) {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            Text(
+                text = about,
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.onSurface
+            )
         }
     }
 }
