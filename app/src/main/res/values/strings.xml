@@ -4,4 +4,7 @@
     <string name="app_name_short">P.Quotes</string>
     <string name="quotes_count">%s Quotes</string>
     <string name="label_quote_author_once_said">%s once said:</string>
+    <string name="search">Search</string>
+    <string name="label_programmer">Programmer</string>
+    <string name="label_quote">Quote</string>
 </resources>

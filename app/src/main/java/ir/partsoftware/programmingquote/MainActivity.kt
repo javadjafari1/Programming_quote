@@ -13,6 +13,7 @@ import androidx.navigation.navArgument
 import ir.partsoftware.programmingquote.core.AppScreens
 import ir.partsoftware.programmingquote.features.authorslist.AuthorsListScreen
 import ir.partsoftware.programmingquote.features.quotesist.QuotesListScreen
+import ir.partsoftware.programmingquote.features.search.SearchScreen
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 
 class MainActivity : ComponentActivity() {
@@ -40,7 +41,7 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
                     AppScreens.QuotesList.createRoute(it)
                 )
             },
-            openSearch = {/*TODO Navigate to Search*/ }
+            openSearch = { navController.navigate(AppScreens.Search.route) }
         )
     }
     composable(
@@ -57,6 +58,18 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
         QuotesListScreen(
             name = "$id. Edsger W. Dijkstra",
             onQuoteClicked = {/*TODO open quoteScreen with id*/ }
+        )
+    }
+    composable(
+        route = AppScreens.Search.route
+    ) {
+        SearchScreen(
+            onAuthorClicked = {
+                navController.navigate(
+                    AppScreens.QuotesList.createRoute(it)
+                )
+            },
+            onQuoteClicked = {/*TODO open Quote screen*/ }
         )
     }
 }

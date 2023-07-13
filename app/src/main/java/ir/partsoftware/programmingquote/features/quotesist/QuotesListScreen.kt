@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +41,7 @@ import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ir.partsoftware.programmingquote.R
+import ir.partsoftware.programmingquote.common.QuoteItem
 
 @Composable
 fun QuotesListScreen(
@@ -183,28 +183,4 @@ private fun ScreenContent(
             )
         }
     }
-}
-
-@Composable
-private fun QuoteItem(
-    text: String,
-    onClicked: () -> Unit
-) {
-    Text(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colors.primary,
-                shape = MaterialTheme.shapes.medium
-            )
-            .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colors.background)
-            .clickable(onClick = onClicked)
-            .padding(all = 24.dp),
-        text = text,
-        style = MaterialTheme.typography.body1,
-        color = MaterialTheme.colors.primary
-    )
-
 }
