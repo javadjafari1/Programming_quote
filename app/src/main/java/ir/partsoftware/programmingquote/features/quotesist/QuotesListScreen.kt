@@ -1,14 +1,21 @@
 package ir.partsoftware.programmingquote.features.quotesist
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -18,8 +25,14 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ir.partsoftware.programmingquote.R
@@ -29,6 +42,8 @@ fun QuotesListScreen(
     name: String,
     onQuoteClicked: (Int) -> Unit
 ) {
+    var isFullImageDisplayed by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -53,7 +68,9 @@ fun QuotesListScreen(
                     Image(
                         modifier = Modifier
                             .padding(start = 16.dp)
-                            .size(34.dp),
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .clickable { isFullImageDisplayed = true },
                         painter = painterResource(R.drawable.ic_launcher_background),
                         contentDescription = "author's image"
                     )
@@ -61,10 +78,42 @@ fun QuotesListScreen(
             )
         }
     ) { paddingValues ->
-        ScreenContent(
-            modifier = Modifier.padding(paddingValues),
-            onQuoteClicked = onQuoteClicked
-        )
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            ScreenContent(
+                modifier = Modifier.padding(paddingValues),
+                onQuoteClicked = onQuoteClicked
+            )
+            AnimatedVisibility(
+                visible = isFullImageDisplayed,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = { isFullImageDisplayed = false }
+                        )
+                )
+                {
+                    Image(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .clip(CircleShape),
+                        painter = painterResource(R.drawable.ic_launcher_background),
+                        contentDescription = "author's image",
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+        }
     }
 }
 
