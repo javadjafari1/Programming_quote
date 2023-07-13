@@ -5,11 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import ir.partsoftware.programmingquote.core.AppScreens
 import ir.partsoftware.programmingquote.features.authorslist.AuthorsListScreen
+import ir.partsoftware.programmingquote.features.quotesist.QuotesListScreen
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 
 class MainActivity : ComponentActivity() {
@@ -32,8 +35,28 @@ class MainActivity : ComponentActivity() {
 private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
     composable(route = AppScreens.AuthorsList.route) {
         AuthorsListScreen(
-            onAuthorClicked = {/*TODO Open Quotes list with id*/ },
+            onAuthorClicked = {
+                navController.navigate(
+                    AppScreens.QuotesList.createRoute(it)
+                )
+            },
             openSearch = {/*TODO Navigate to Search*/ }
+        )
+    }
+    composable(
+        route = AppScreens.QuotesList.route,
+        arguments = listOf(
+            navArgument("id") {
+                type = NavType.IntType
+                nullable = false
+            }
+        )
+    ) { backStackEntry ->
+        val id = backStackEntry.arguments?.getInt("id")
+            ?: throw IllegalStateException("id was null")
+        QuotesListScreen(
+            name = "$id. Edsger W. Dijkstra",
+            onQuoteClicked = {/*TODO open quoteScreen with id*/ }
         )
     }
 }

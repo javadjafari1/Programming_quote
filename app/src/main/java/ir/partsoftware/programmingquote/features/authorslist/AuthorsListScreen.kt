@@ -145,7 +145,7 @@ private fun ScreenContent(
         ) {
             items(30) {
                 AuthorItem(
-                    authorName = "${it + 1}. Edsger W. Dijkstra",
+                    authorName = "$it. Edsger W. Dijkstra",
                     quotesCount = 24 + it,
                     onItemClick = {
                         /*it represent as Id*/
