@@ -9,4 +9,6 @@ sealed class AppScreens(val route: String) {
             return "quotes-list/$id"
         }
     }
+
+    object Search : AppScreens("search")
 }
