@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ir.partsoftware.programmingquote.core.AppScreens
 import ir.partsoftware.programmingquote.features.authorslist.AuthorsListScreen
+import ir.partsoftware.programmingquote.features.quote.QuoteScreen
 import ir.partsoftware.programmingquote.features.quotesist.QuotesListScreen
 import ir.partsoftware.programmingquote.features.search.SearchScreen
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
@@ -57,7 +58,9 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
             ?: throw IllegalStateException("id was null")
         QuotesListScreen(
             name = "$id. Edsger W. Dijkstra",
-            onQuoteClicked = {/*TODO open quoteScreen with id*/ }
+            onQuoteClicked = { quoteId ->
+                navController.navigate(AppScreens.Quote.createRoute(quoteId))
+            }
         )
     }
     composable(
@@ -69,7 +72,24 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
                     AppScreens.QuotesList.createRoute(it)
                 )
             },
-            onQuoteClicked = {/*TODO open Quote screen*/ }
+            onQuoteClicked = { quoteId ->
+                navController.navigate(AppScreens.Quote.createRoute(quoteId))
+            }
+        )
+    }
+    composable(
+        route = AppScreens.Quote.route,
+        arguments = listOf(
+            navArgument("id") {
+                type = NavType.IntType
+                nullable = false
+            }
+        )
+    ) { backStackEntry ->
+        val id = backStackEntry.arguments?.getInt("id")
+            ?: throw IllegalStateException("id was null")
+        QuoteScreen(
+            name = "$id Edsger W. Dijkstra"
         )
     }
 }

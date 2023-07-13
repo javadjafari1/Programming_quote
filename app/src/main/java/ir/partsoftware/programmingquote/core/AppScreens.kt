@@ -11,4 +11,10 @@ sealed class AppScreens(val route: String) {
     }
 
     object Search : AppScreens("search")
+
+    object Quote : AppScreens("quote/{id}") {
+        fun createRoute(id: Int): String {
+            return "quote/$id"
+        }
+    }
 }
