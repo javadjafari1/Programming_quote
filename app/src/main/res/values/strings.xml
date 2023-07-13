@@ -3,4 +3,5 @@
     <string name="label_generate_random">Generate Random</string>
     <string name="app_name_short">P.Quotes</string>
     <string name="quotes_count">%s Quotes</string>
+    <string name="label_quote_author_once_said">%s once said:</string>
 </resources>

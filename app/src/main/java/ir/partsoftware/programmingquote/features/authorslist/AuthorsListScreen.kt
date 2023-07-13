@@ -17,17 +17,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,11 +45,52 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ir.partsoftware.programmingquote.R
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AuthorsListScreen(
     onAuthorClicked: (Int) -> Unit,
     openSearch: () -> Unit,
+) {
+    val bottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden
+    )
+    val scope = rememberCoroutineScope()
+
+    ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
+        content = {
+            ScreenContent(
+                openSearch = openSearch,
+                onAuthorClicked = onAuthorClicked,
+                generateRandom = {
+                    scope.launch {
+                        bottomSheetState.show()
+                    }
+                }
+            )
+        },
+        sheetContent = {
+            RandomQuote(
+                name = "Jeff Sickel",
+                quote = "Nine women can't make a baby in one month."
+            )
+        },
+        sheetShape = MaterialTheme.shapes.large.copy(
+            bottomStart = CornerSize(0.dp),
+            bottomEnd = CornerSize(0.dp)
+        ),
+        sheetElevation = 4.dp,
+
+        )
+}
+
+@Composable
+private fun ScreenContent(
+    openSearch: () -> Unit,
+    onAuthorClicked: (Int) -> Unit,
+    generateRandom: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -79,7 +126,7 @@ fun AuthorsListScreen(
             )
         },
         floatingActionButton = {
-            Button(onClick = { /*TODO Open bottomSheet*/ }) {
+            Button(onClick = generateRandom) {
                 Text(
                     text = stringResource(R.string.label_generate_random),
                     style = MaterialTheme.typography.button,
@@ -87,7 +134,7 @@ fun AuthorsListScreen(
                 )
             }
         },
-        floatingActionButtonPosition = FabPosition.Center
+        floatingActionButtonPosition = FabPosition.Center,
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -167,3 +214,32 @@ fun AuthorsListPreview() {
         AuthorsListScreen(onAuthorClicked = {}, openSearch = {})
     }
 }
+
+@Composable
+private fun RandomQuote(
+    name: String,
+    quote: String
+) {
+    Column(
+        Modifier
+            .padding(
+                vertical = 32.dp,
+                horizontal = 24.dp
+            )
+    ) {
+        Text(
+            text = stringResource(R.string.label_quote_author_once_said, name),
+            color = MaterialTheme.colors.onSurface,
+            style = MaterialTheme.typography.body1,
+        )
+
+        Spacer(modifier = Modifier.size(32.dp))
+
+        Text(
+            text = quote,
+            color = MaterialTheme.colors.primary,
+            style = MaterialTheme.typography.subtitle1,
+        )
+    }
+}
+
