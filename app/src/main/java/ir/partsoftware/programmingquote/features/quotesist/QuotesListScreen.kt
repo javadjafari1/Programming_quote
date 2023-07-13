@@ -24,7 +24,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
@@ -41,6 +40,7 @@ import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ir.partsoftware.programmingquote.R
+import ir.partsoftware.programmingquote.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.common.QuoteItem
 
 @Composable
@@ -53,9 +53,7 @@ fun QuotesListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                backgroundColor = MaterialTheme.colors.background,
-                elevation = 0.dp,
+            PQuoteAppBar(
                 title = {
                     Text(
                         text = name,

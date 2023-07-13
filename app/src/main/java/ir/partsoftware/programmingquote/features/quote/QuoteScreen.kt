@@ -1,7 +1,6 @@
 package ir.partsoftware.programmingquote.features.quote
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +13,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import ir.partsoftware.programmingquote.R
+import ir.partsoftware.programmingquote.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.core.openUrl
 import ir.partsoftware.programmingquote.core.shareText
 
@@ -32,11 +31,7 @@ fun QuoteScreen(name: String) {
     val context = LocalContext.current
     Scaffold(
         topBar = {
-            TopAppBar(
-                elevation = 0.dp,
-                backgroundColor = MaterialTheme.colors.background,
-                contentPadding = PaddingValues(horizontal = 16.dp)
-            ) {
+            PQuoteAppBar {
                 Text(
                     text = name,
                     color = MaterialTheme.colors.onSurface,

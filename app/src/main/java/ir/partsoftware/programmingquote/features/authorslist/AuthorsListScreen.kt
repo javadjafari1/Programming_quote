@@ -20,7 +20,6 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberModalBottomSheetState
@@ -34,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ir.partsoftware.programmingquote.R
 import ir.partsoftware.programmingquote.common.AuthorItem
+import ir.partsoftware.programmingquote.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 import kotlinx.coroutines.launch
 
@@ -84,7 +84,7 @@ private fun ScreenContent(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
+            PQuoteAppBar(
                 title = {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
@@ -111,8 +111,6 @@ private fun ScreenContent(
                         tint = MaterialTheme.colors.primary
                     )
                 },
-                backgroundColor = MaterialTheme.colors.background,
-                elevation = 0.dp
             )
         },
         floatingActionButton = {
