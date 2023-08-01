@@ -1,4 +1,4 @@
-package ir.partsoftware.programmingquote.common
+package ir.partsoftware.programmingquote.ui.common
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column

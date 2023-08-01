@@ -12,10 +12,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ir.partsoftware.programmingquote.core.AppScreens
-import ir.partsoftware.programmingquote.features.authorslist.AuthorsListScreen
-import ir.partsoftware.programmingquote.features.quote.QuoteScreen
-import ir.partsoftware.programmingquote.features.quotesist.QuotesListScreen
-import ir.partsoftware.programmingquote.features.search.SearchScreen
+import ir.partsoftware.programmingquote.ui.screens.authorslist.AuthorsListScreen
+import ir.partsoftware.programmingquote.ui.screens.quote.QuoteScreen
+import ir.partsoftware.programmingquote.ui.screens.quotesist.QuotesListScreen
+import ir.partsoftware.programmingquote.ui.screens.search.SearchScreen
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 
 class MainActivity : ComponentActivity() {

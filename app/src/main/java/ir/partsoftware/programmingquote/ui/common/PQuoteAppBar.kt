@@ -1,4 +1,4 @@
-package ir.partsoftware.programmingquote.common
+package ir.partsoftware.programmingquote.ui.common
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope

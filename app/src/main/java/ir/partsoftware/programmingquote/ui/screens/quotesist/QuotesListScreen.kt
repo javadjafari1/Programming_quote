@@ -1,4 +1,4 @@
-package ir.partsoftware.programmingquote.features.quotesist
+package ir.partsoftware.programmingquote.ui.screens.quotesist
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -41,8 +41,8 @@ import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ir.partsoftware.programmingquote.R
-import ir.partsoftware.programmingquote.common.PQuoteAppBar
-import ir.partsoftware.programmingquote.common.QuoteItem
+import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
+import ir.partsoftware.programmingquote.ui.common.QuoteItem
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 
 @Composable

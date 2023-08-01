@@ -1,4 +1,4 @@
-package ir.partsoftware.programmingquote.features.quote
+package ir.partsoftware.programmingquote.ui.screens.quote
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import ir.partsoftware.programmingquote.R
-import ir.partsoftware.programmingquote.common.PQuoteAppBar
+import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.core.openUrl
 import ir.partsoftware.programmingquote.core.shareText
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme

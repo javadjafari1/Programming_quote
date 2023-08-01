@@ -1,4 +1,4 @@
-package ir.partsoftware.programmingquote.features.search
+package ir.partsoftware.programmingquote.ui.screens.search
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -30,9 +30,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ir.partsoftware.programmingquote.R
-import ir.partsoftware.programmingquote.common.AuthorItem
-import ir.partsoftware.programmingquote.common.PQuotesChip
-import ir.partsoftware.programmingquote.common.QuoteItem
+import ir.partsoftware.programmingquote.ui.common.AuthorItem
+import ir.partsoftware.programmingquote.ui.common.PQuotesChip
+import ir.partsoftware.programmingquote.ui.common.QuoteItem
 import ir.partsoftware.programmingquote.core.SearchType
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 import kotlinx.coroutines.launch
