@@ -53,14 +53,15 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
         route = AppScreens.QuotesList.route,
         arguments = listOf(
             navArgument("id") {
-                type = NavType.IntType
+                type = NavType.StringType
                 nullable = false
             }
         )
     ) { backStackEntry ->
-        val id = backStackEntry.arguments?.getInt("id")
+        val id = backStackEntry.arguments?.getString("id")
             ?: throw IllegalStateException("id was null")
         QuotesListScreen(
+            id = id,
             name = "$id. Edsger W. Dijkstra",
             onQuoteClicked = { quoteId ->
                 navController.navigate(AppScreens.Quote.createRoute(quoteId))

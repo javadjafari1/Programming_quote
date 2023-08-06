@@ -9,21 +9,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -31,8 +39,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import ir.partsoftware.programmingquote.R
 import ir.partsoftware.programmingquote.ui.common.AuthorItem
+import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 import kotlinx.coroutines.launch
@@ -40,8 +50,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AuthorsListScreen(
-    onAuthorClicked: (Int) -> Unit,
+    onAuthorClicked: (String) -> Unit,
     openSearch: () -> Unit,
+    viewModel: AuthorsListViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
@@ -58,7 +69,8 @@ fun AuthorsListScreen(
                     scope.launch {
                         bottomSheetState.show()
                     }
-                }
+                },
+                viewModel = viewModel
             )
         },
         sheetContent = {
@@ -79,10 +91,30 @@ fun AuthorsListScreen(
 @Composable
 private fun ScreenContent(
     openSearch: () -> Unit,
-    onAuthorClicked: (Int) -> Unit,
-    generateRandom: () -> Unit
+    onAuthorClicked: (String) -> Unit,
+    generateRandom: () -> Unit,
+    viewModel: AuthorsListViewModel
 ) {
+    val authors by viewModel.authors.collectAsState()
+    val authorResult by viewModel.authorResult.collectAsState()
+
+    val scaffoldState = rememberScaffoldState()
+
+    LaunchedEffect(authorResult) {
+        if (authorResult is Result.Error) {
+            val result = scaffoldState.snackbarHostState.showSnackbar(
+                (authorResult as Result.Error).message,
+                actionLabel = "retry",
+                duration = SnackbarDuration.Indefinite
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.getAuthors()
+            }
+        }
+    }
+
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             PQuoteAppBar(
                 title = {
@@ -124,20 +156,25 @@ private fun ScreenContent(
         },
         floatingActionButtonPosition = FabPosition.Center,
     ) { paddingValues ->
+        if (authorResult is Result.Loading) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(30) {
+            items(authors) { author ->
                 AuthorItem(
-                    authorName = "$it. Edsger W. Dijkstra",
-                    quotesCount = 24 + it,
+                    authorName = author.name,
+                    quotesCount = author.quoteCount ?: 0,
+                    authorImage = author.image,
                     onItemClick = {
-                        /*it represent as Id*/
-                        onAuthorClicked(it)
+                        onAuthorClicked(author.id)
                     }
                 )
             }

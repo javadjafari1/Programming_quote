@@ -47,6 +47,7 @@ import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 
 @Composable
 fun QuotesListScreen(
+    id: String,
     name: String,
     onQuoteClicked: (Int) -> Unit
 ) {
@@ -189,7 +190,7 @@ private fun ScreenContent(
 @Composable
 fun QuoteListScreenPreview() {
     ProgrammingQuoteTheme {
-        QuotesListScreen(name = "Javad jafari", onQuoteClicked = {})
+        QuotesListScreen(id = "asdklav45", name = "Javad jafari", onQuoteClicked = {})
     }
 }
 

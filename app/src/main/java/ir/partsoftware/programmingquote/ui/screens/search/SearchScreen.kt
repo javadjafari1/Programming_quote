@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SearchScreen(
     onQuoteClicked: (Int) -> Unit,
-    onAuthorClicked: (Int) -> Unit
+    onAuthorClicked: (String) -> Unit
 ) {
     var searchText by remember { mutableStateOf("") }
     val pagerState = rememberPagerState()
@@ -121,9 +121,10 @@ fun SearchScreen(
                             AuthorItem(
                                 authorName = "$it. Edsger W. Dijkstra",
                                 quotesCount = 24 + it,
+                                authorImage = null, // TODO
                                 onItemClick = {
                                     /*it represent as Id*/
-                                    onAuthorClicked(it)
+                                    onAuthorClicked("$it")
                                 }
                             )
                         }
