@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
@@ -21,6 +23,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
@@ -32,8 +35,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -41,11 +44,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ir.partsoftware.programmingquote.R
+import ir.partsoftware.programmingquote.network.author.Author
 import ir.partsoftware.programmingquote.ui.common.AuthorItem
-import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
+import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -55,9 +59,47 @@ fun AuthorsListScreen(
     viewModel: AuthorsListViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
-    val scope = rememberCoroutineScope()
+
+    val scaffoldState = rememberScaffoldState()
+
+    val randomQuote by viewModel.randomQuote.collectAsState()
+    val authors by viewModel.authors.collectAsState()
+    val authorResult by viewModel.authorResult.collectAsState()
+    val randomResult by viewModel.randomResult.collectAsState(initial = Result.Idle)
+
+    LaunchedEffect(Unit) {
+        viewModel.randomResult.collectLatest { result ->
+            when (result) {
+                is Result.Error -> {
+                    scaffoldState.snackbarHostState.showSnackbar(result.message)
+                }
+
+                Result.Idle,
+                Result.Loading -> {
+                }
+
+                Result.Success -> {
+                    bottomSheetState.show()
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(authorResult) {
+        if (authorResult is Result.Error) {
+            val result = scaffoldState.snackbarHostState.showSnackbar(
+                (authorResult as Result.Error).message,
+                actionLabel = "retry",
+                duration = SnackbarDuration.Indefinite
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.getAuthors()
+            }
+        }
+    }
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -66,18 +108,21 @@ fun AuthorsListScreen(
                 openSearch = openSearch,
                 onAuthorClicked = onAuthorClicked,
                 generateRandom = {
-                    scope.launch {
-                        bottomSheetState.show()
-                    }
+                    viewModel.getRandomQuote()
                 },
-                viewModel = viewModel
+                scaffoldState = scaffoldState,
+                randomResult = randomResult,
+                authors = authors,
+                authorResult = authorResult
             )
         },
         sheetContent = {
-            RandomQuote(
-                name = "Jeff Sickel",
-                quote = "Nine women can't make a baby in one month."
-            )
+            randomQuote?.let {
+                RandomQuote(
+                    authorName = it.author.name,
+                    quote = it.quote.text
+                )
+            }
         },
         sheetShape = MaterialTheme.shapes.large.copy(
             bottomStart = CornerSize(0.dp),
@@ -93,26 +138,11 @@ private fun ScreenContent(
     openSearch: () -> Unit,
     onAuthorClicked: (String) -> Unit,
     generateRandom: () -> Unit,
-    viewModel: AuthorsListViewModel
+    scaffoldState: ScaffoldState,
+    randomResult: Result,
+    authors: List<Author>,
+    authorResult: Result,
 ) {
-    val authors by viewModel.authors.collectAsState()
-    val authorResult by viewModel.authorResult.collectAsState()
-
-    val scaffoldState = rememberScaffoldState()
-
-    LaunchedEffect(authorResult) {
-        if (authorResult is Result.Error) {
-            val result = scaffoldState.snackbarHostState.showSnackbar(
-                (authorResult as Result.Error).message,
-                actionLabel = "retry",
-                duration = SnackbarDuration.Indefinite
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.getAuthors()
-            }
-        }
-    }
-
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -146,12 +176,22 @@ private fun ScreenContent(
             )
         },
         floatingActionButton = {
-            Button(onClick = generateRandom) {
-                Text(
-                    text = stringResource(R.string.label_generate_random),
-                    style = MaterialTheme.typography.button,
-                    color = MaterialTheme.colors.onPrimary
+            Button(
+                onClick = generateRandom,
+                enabled = randomResult !is Result.Loading,
+                colors = ButtonDefaults.buttonColors(
+                    disabledBackgroundColor = MaterialTheme.colors.primary
                 )
+            ) {
+                if (randomResult == Result.Loading) {
+                    CircularProgressIndicator(color = Color.White)
+                } else {
+                    Text(
+                        text = stringResource(R.string.label_generate_random),
+                        style = MaterialTheme.typography.button,
+                        color = MaterialTheme.colors.onPrimary
+                    )
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.Center,
@@ -192,7 +232,7 @@ private fun AuthorsListPreview() {
 
 @Composable
 private fun RandomQuote(
-    name: String,
+    authorName: String,
     quote: String
 ) {
     Column(
@@ -203,7 +243,7 @@ private fun RandomQuote(
             )
     ) {
         Text(
-            text = stringResource(R.string.label_quote_author_once_said, name),
+            text = stringResource(R.string.label_quote_author_once_said, authorName),
             color = MaterialTheme.colors.onSurface,
             style = MaterialTheme.typography.body1,
         )
