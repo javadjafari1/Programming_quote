@@ -4,16 +4,16 @@ sealed class AppScreens(val route: String) {
 
     object AuthorsList : AppScreens("authors-list")
 
-    object QuotesList : AppScreens("quotes-list/{id}") {
-        fun createRoute(id: String): String {
-            return "quotes-list/$id"
+    object QuotesList : AppScreens("quotes-list?authorId={authorId}&authorName={authorName}") {
+        fun createRoute(authorId: String, authorName: String): String {
+            return "quotes-list?authorId=$authorId&authorName=$authorName"
         }
     }
 
     object Search : AppScreens("search")
 
     object Quote : AppScreens("quote/{id}") {
-        fun createRoute(id: Int): String {
+        fun createRoute(id: String): String {
             return "quote/$id"
         }
     }

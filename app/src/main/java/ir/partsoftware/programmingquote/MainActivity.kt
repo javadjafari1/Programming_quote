@@ -41,9 +41,9 @@ class MainActivity : ComponentActivity() {
 private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
     composable(route = AppScreens.AuthorsList.route) {
         AuthorsListScreen(
-            onAuthorClicked = {
+            onAuthorClicked = { id, name ->
                 navController.navigate(
-                    AppScreens.QuotesList.createRoute(it)
+                    AppScreens.QuotesList.createRoute(id, name)
                 )
             },
             openSearch = { navController.navigate(AppScreens.Search.route) }
@@ -54,15 +54,24 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
         arguments = listOf(
             navArgument("id") {
                 type = NavType.StringType
+                defaultValue = ""
+                nullable = false
+            },
+            navArgument("name") {
+                type = NavType.StringType
+                defaultValue = ""
                 nullable = false
             }
         )
     ) { backStackEntry ->
-        val id = backStackEntry.arguments?.getString("id")
-            ?: throw IllegalStateException("id was null")
+        val authorId = backStackEntry.arguments?.getString("authorId")
+            ?: throw IllegalStateException("authorId was null")
+        val authorName = backStackEntry.arguments?.getString("authorName")
+            ?: throw IllegalStateException("authorName was null")
+
         QuotesListScreen(
-            id = id,
-            name = "$id. Edsger W. Dijkstra",
+            authorId = authorId,
+            authorName = authorName,
             onQuoteClicked = { quoteId ->
                 navController.navigate(AppScreens.Quote.createRoute(quoteId))
             }
@@ -72,9 +81,9 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
         route = AppScreens.Search.route
     ) {
         SearchScreen(
-            onAuthorClicked = {
+            onAuthorClicked = { id, name ->
                 navController.navigate(
-                    AppScreens.QuotesList.createRoute(it)
+                    AppScreens.QuotesList.createRoute(id, name)
                 )
             },
             onQuoteClicked = { quoteId ->
@@ -86,12 +95,12 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
         route = AppScreens.Quote.route,
         arguments = listOf(
             navArgument("id") {
-                type = NavType.IntType
+                type = NavType.StringType
                 nullable = false
             }
         )
     ) { backStackEntry ->
-        val id = backStackEntry.arguments?.getInt("id")
+        val id = backStackEntry.arguments?.getString("id")
             ?: throw IllegalStateException("id was null")
         QuoteScreen(
             name = "$id Edsger W. Dijkstra"

@@ -43,8 +43,8 @@ import kotlinx.coroutines.launch
 )
 @Composable
 fun SearchScreen(
-    onQuoteClicked: (Int) -> Unit,
-    onAuthorClicked: (String) -> Unit
+    onQuoteClicked: (String) -> Unit,
+    onAuthorClicked: (id: String, name: String) -> Unit
 ) {
     var searchText by remember { mutableStateOf("") }
     val pagerState = rememberPagerState()
@@ -124,7 +124,7 @@ fun SearchScreen(
                                 authorImage = null, // TODO
                                 onItemClick = {
                                     /*it represent as Id*/
-                                    onAuthorClicked("$it")
+                                    onAuthorClicked("$it", "$it")
                                 }
                             )
                         }
@@ -133,7 +133,7 @@ fun SearchScreen(
                             QuoteItem(
                                 text = " $it women can't make a baby in one month.",
                                 onClicked = {
-                                    onQuoteClicked(it)
+                                    onQuoteClicked("$it")
                                 }
                             )
                         }
@@ -148,6 +148,6 @@ fun SearchScreen(
 @Composable
 fun SearchScreenPreview() {
     ProgrammingQuoteTheme {
-        SearchScreen(onQuoteClicked = {}, onAuthorClicked = {})
+        SearchScreen(onQuoteClicked = {}, onAuthorClicked = {_, _ -> })
     }
 }

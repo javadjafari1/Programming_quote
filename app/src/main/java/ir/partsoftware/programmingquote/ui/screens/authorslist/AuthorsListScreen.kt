@@ -54,7 +54,7 @@ import kotlinx.coroutines.flow.collectLatest
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AuthorsListScreen(
-    onAuthorClicked: (String) -> Unit,
+    onAuthorClicked: (id: String, name: String) -> Unit,
     openSearch: () -> Unit,
     viewModel: AuthorsListViewModel = hiltViewModel()
 ) {
@@ -136,7 +136,7 @@ fun AuthorsListScreen(
 @Composable
 private fun ScreenContent(
     openSearch: () -> Unit,
-    onAuthorClicked: (String) -> Unit,
+    onAuthorClicked: (id: String, name: String) -> Unit,
     generateRandom: () -> Unit,
     scaffoldState: ScaffoldState,
     randomResult: Result,
@@ -214,7 +214,7 @@ private fun ScreenContent(
                     quotesCount = author.quoteCount ?: 0,
                     authorImage = author.image,
                     onItemClick = {
-                        onAuthorClicked(author.id)
+                        onAuthorClicked(author.id, author.name)
                     }
                 )
             }
@@ -226,7 +226,7 @@ private fun ScreenContent(
 @Composable
 private fun AuthorsListPreview() {
     ProgrammingQuoteTheme {
-        AuthorsListScreen(onAuthorClicked = {}, openSearch = {})
+        AuthorsListScreen(onAuthorClicked = { _, _ -> }, openSearch = {})
     }
 }
 
