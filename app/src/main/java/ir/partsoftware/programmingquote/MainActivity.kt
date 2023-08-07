@@ -103,7 +103,7 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
         val id = backStackEntry.arguments?.getString("id")
             ?: throw IllegalStateException("id was null")
         QuoteScreen(
-            name = "$id Edsger W. Dijkstra"
+            id = id
         )
     }
 }

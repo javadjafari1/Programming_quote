@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.partsoftware.programmingquote.network.author.Author
 import ir.partsoftware.programmingquote.network.author.AuthorApi
 import ir.partsoftware.programmingquote.network.quote.QuoteApi
-import ir.partsoftware.programmingquote.network.quote.RandomQuoteResponse
+import ir.partsoftware.programmingquote.network.quote.QuoteResponse
 import ir.partsoftware.programmingquote.ui.common.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,8 +33,8 @@ class AuthorsListViewModel @Inject constructor(
     private val _authors = MutableStateFlow<List<Author>>(emptyList())
     val authors: StateFlow<List<Author>> = _authors.asStateFlow()
 
-    private val _randomQuote = MutableStateFlow<RandomQuoteResponse?>(null)
-    val randomQuote: StateFlow<RandomQuoteResponse?> = _randomQuote.asStateFlow()
+    private val _randomQuote = MutableStateFlow<QuoteResponse?>(null)
+    val randomQuote: StateFlow<QuoteResponse?> = _randomQuote.asStateFlow()
 
     init {
         getAuthors()

@@ -1,5 +1,6 @@
 package ir.partsoftware.programmingquote.ui.screens.quotesist
 
+import android.widget.TextView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -46,7 +47,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
+import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import ir.partsoftware.programmingquote.R
@@ -201,10 +204,9 @@ private fun AuthorDetailDialog(
                 color = MaterialTheme.colors.primary
             )
             Spacer(modifier = Modifier.size(16.dp))
-            Text(
-                text = about,
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onSurface
+            AndroidView(
+                factory = { context -> TextView(context) },
+                update = { it.text = HtmlCompat.fromHtml(about, HtmlCompat.FROM_HTML_MODE_COMPACT) }
             )
         }
     }
