@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ir.partsoftware.programmingquote.network.common.safeApi
 import ir.partsoftware.programmingquote.network.quote.QuoteApi
 import ir.partsoftware.programmingquote.network.quote.QuoteResponse
 import ir.partsoftware.programmingquote.ui.common.Result
@@ -33,24 +34,10 @@ class QuoteViewModel @Inject constructor(
 
     fun getQuote(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _quoteResult.value = Result.Loading
-
-            try {
-                val response = quoteApi.getQuoteById(id)
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    if (body != null) {
-                        _quote.value = body
-                        _quoteResult.value = Result.Success
-                    } else {
-                        _quoteResult.value = Result.Error("whoops body was empty")
-                    }
-                } else {
-                    _quoteResult.value = Result.Error("whoops: got ${response.code()} code!")
-                }
-            } catch (t: Throwable) {
-                _quoteResult.value = Result.Error("whoops: ${t.message}")
-            }
+            safeApi(
+                call = { quoteApi.getQuoteById(id) },
+                onDataReady = { _quote.value = it }
+            ).collect(_quoteResult)
         }
     }
 }

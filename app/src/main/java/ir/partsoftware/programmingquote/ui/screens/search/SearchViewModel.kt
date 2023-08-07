@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.partsoftware.programmingquote.network.author.Author
+import ir.partsoftware.programmingquote.network.common.safeApi
 import ir.partsoftware.programmingquote.network.quote.Quote
 import ir.partsoftware.programmingquote.network.search.SearchApi
 import ir.partsoftware.programmingquote.ui.common.Result
@@ -39,25 +40,13 @@ class SearchViewModel @Inject constructor(
         searchJob?.cancel()
 
         searchJob = viewModelScope.launch(Dispatchers.IO) {
-            _searchResult.value = Result.Loading
-
-            try {
-                val response = searchApi.search(query.value)
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    if (body != null) {
-                        _authors.value = body.authors
-                        _quotes.value = body.quotes
-                        _searchResult.value = Result.Success
-                    } else {
-                        _searchResult.value = Result.Error("whoops body was empty")
-                    }
-                } else {
-                    _searchResult.value = Result.Error("whoops: got ${response.code()} code!")
+            safeApi(
+                call = { searchApi.search(query.value) },
+                onDataReady = {
+                    _authors.value = it.authors
+                    _quotes.value = it.quotes
                 }
-            } catch (t: Throwable) {
-                _searchResult.value = Result.Error("whoops: ${t.message}")
-            }
+            ).collect(_searchResult)
             searchJob = null
         }
     }

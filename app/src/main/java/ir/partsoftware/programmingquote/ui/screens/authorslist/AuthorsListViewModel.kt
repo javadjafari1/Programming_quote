@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.partsoftware.programmingquote.network.author.Author
 import ir.partsoftware.programmingquote.network.author.AuthorApi
+import ir.partsoftware.programmingquote.network.common.safeApi
 import ir.partsoftware.programmingquote.network.quote.QuoteApi
 import ir.partsoftware.programmingquote.network.quote.QuoteResponse
 import ir.partsoftware.programmingquote.ui.common.Result
@@ -42,47 +43,19 @@ class AuthorsListViewModel @Inject constructor(
 
     fun getAuthors() {
         viewModelScope.launch(Dispatchers.IO) {
-            _authorResult.value = Result.Loading
-
-            try {
-                val response = authorApi.getAuthors()
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    if (body != null) {
-                        _authors.value = body
-                        _authorResult.value = Result.Success
-                    } else {
-                        _authorResult.value = Result.Error("whoops body was empty")
-                    }
-                } else {
-                    _authorResult.value = Result.Error("whoops: got ${response.code()} code!")
-                }
-            } catch (t: Throwable) {
-                _authorResult.value = Result.Error("whoops: ${t.message}")
-            }
+            safeApi(
+                call = { authorApi.getAuthors() },
+                onDataReady = { _authors.value = it }
+            ).collect(_authorResult)
         }
     }
 
     fun getRandomQuote() {
         viewModelScope.launch(Dispatchers.IO) {
-            _randomResult.emit(Result.Loading)
-
-            try {
-                val response = quoteApi.getRandomQuote()
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    if (body != null) {
-                        _randomQuote.value = body
-                        _randomResult.emit(Result.Success)
-                    } else {
-                        _randomResult.emit(Result.Error("whoops body was empty"))
-                    }
-                } else {
-                    _randomResult.emit(Result.Error("whoops: got ${response.code()} code!"))
-                }
-            } catch (t: Throwable) {
-                _randomResult.emit(Result.Error("whoops: ${t.message}"))
-            }
+            safeApi(
+                call = { quoteApi.getRandomQuote() },
+                onDataReady = { _randomQuote.value = it }
+            ).collect(_randomResult)
         }
     }
 }

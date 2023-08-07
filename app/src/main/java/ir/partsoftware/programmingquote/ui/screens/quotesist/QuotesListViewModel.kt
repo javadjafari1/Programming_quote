@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.partsoftware.programmingquote.network.author.Author
+import ir.partsoftware.programmingquote.network.common.safeApi
 import ir.partsoftware.programmingquote.network.quote.Quote
 import ir.partsoftware.programmingquote.network.quote.QuoteApi
 import ir.partsoftware.programmingquote.ui.common.Result
@@ -38,25 +39,13 @@ class QuotesListViewModel @Inject constructor(
 
     fun getAuthorQuote() {
         viewModelScope.launch(Dispatchers.IO) {
-            _quoteResult.value = Result.Loading
-
-            try {
-                val response = quoteApi.getAuthorQuotes(authorId)
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    if (body != null) {
-                        _author.value = body.author
-                        _quotes.value = body.quotes
-                        _quoteResult.value = Result.Success
-                    } else {
-                        _quoteResult.value = Result.Error("whoops body was empty")
-                    }
-                } else {
-                    _quoteResult.value = Result.Error("whoops: got ${response.code()} code!")
+            safeApi(
+                call = { quoteApi.getAuthorQuotes(authorId) },
+                onDataReady = {
+                    _author.value = it.author
+                    _quotes.value = it.quotes
                 }
-            } catch (t: Throwable) {
-                _quoteResult.value = Result.Error("whoops: ${t.message}")
-            }
+            ).collect(_quoteResult)
         }
     }
 }
