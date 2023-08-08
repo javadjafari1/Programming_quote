@@ -32,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -45,6 +46,8 @@ import ir.partsoftware.programmingquote.ui.common.PQuotesChip
 import ir.partsoftware.programmingquote.ui.common.QuoteItem
 import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -53,7 +56,7 @@ import kotlinx.coroutines.launch
 )
 @Composable
 fun SearchScreen(
-    onQuoteClicked: (String) -> Unit,
+    onQuoteClicked: (id: String, authorName: String) -> Unit,
     onAuthorClicked: (id: String, name: String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
@@ -61,25 +64,28 @@ fun SearchScreen(
     val pagerState = rememberPagerState()
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val authors by viewModel.authors.collectAsState()
     val quotes by viewModel.quotes.collectAsState()
-    val searchResult by viewModel.searchResult.collectAsState()
+    val searchResult by viewModel.searchResult.collectAsState(Result.Idle)
 
-    LaunchedEffect(searchResult) {
-        if (searchResult is Result.Loading) {
-            scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
-        }
-        if (searchResult is Result.Error) {
-            val result = scaffoldState.snackbarHostState.showSnackbar(
-                (searchResult as Result.Error).message,
-                actionLabel = "retry",
-                duration = SnackbarDuration.Indefinite
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.search()
+    LaunchedEffect(Unit) {
+        viewModel.searchResult.onEach { searchResult ->
+            if (searchResult is Result.Loading) {
+                scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
             }
-        }
+            if (searchResult is Result.Error) {
+                val result = scaffoldState.snackbarHostState.showSnackbar(
+                    searchResult.message,
+                    actionLabel = context.getString(R.string.label_retry),
+                    duration = SnackbarDuration.Indefinite
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    viewModel.search()
+                }
+            }
+        }.launchIn(this)
     }
 
     Scaffold(scaffoldState = scaffoldState) { paddingValues ->
@@ -109,6 +115,7 @@ fun SearchScreen(
                 },
                 textStyle = MaterialTheme.typography.subtitle1,
                 singleLine = true,
+                maxLines = 1,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(
                     onSearch = {
@@ -171,7 +178,7 @@ fun SearchScreen(
                             items(authors) { author ->
                                 AuthorItem(
                                     authorName = author.name,
-                                    quotesCount = author.quoteCount ?: 0,
+                                    quotesCount = author.quoteCount,
                                     authorImage = author.image,
                                     onItemClick = {
                                         onAuthorClicked(author.id, author.name)
@@ -179,11 +186,12 @@ fun SearchScreen(
                                 )
                             }
                         } else if (page == SearchType.Quote.ordinal) {
-                            items(quotes) { quote ->
+                            items(quotes) { item ->
                                 QuoteItem(
-                                    text = quote.text,
+                                    text = item.quote.text,
+                                    authorName = item.author.name,
                                     onClicked = {
-                                        onQuoteClicked(quote.id)
+                                        onQuoteClicked(item.quote.id, item.author.name)
                                     }
                                 )
                             }
@@ -216,6 +224,6 @@ private fun hasNoResult(
 @Composable
 fun SearchScreenPreview() {
     ProgrammingQuoteTheme {
-        SearchScreen(onQuoteClicked = {}, onAuthorClicked = { _, _ -> })
+        SearchScreen(onQuoteClicked = { _, _ -> }, onAuthorClicked = { _, _ -> })
     }
 }

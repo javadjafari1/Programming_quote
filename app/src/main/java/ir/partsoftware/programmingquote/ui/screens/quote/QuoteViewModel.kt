@@ -10,7 +10,9 @@ import ir.partsoftware.programmingquote.network.quote.QuoteResponse
 import ir.partsoftware.programmingquote.ui.common.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,7 +23,7 @@ class QuoteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _quoteResult = MutableStateFlow<Result>(Result.Idle)
-    val quoteResult: StateFlow<Result> = _quoteResult.asStateFlow()
+    val quoteResult: SharedFlow<Result> = _quoteResult.asSharedFlow()
 
     private val _quote = MutableStateFlow<QuoteResponse?>(null)
     val quote: StateFlow<QuoteResponse?> = _quote.asStateFlow()

@@ -11,7 +11,9 @@ import ir.partsoftware.programmingquote.network.quote.QuoteApi
 import ir.partsoftware.programmingquote.ui.common.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,7 +24,7 @@ class QuotesListViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _quoteResult = MutableStateFlow<Result>(Result.Idle)
-    val quoteResult: StateFlow<Result> = _quoteResult.asStateFlow()
+    val quoteResult: SharedFlow<Result> = _quoteResult.asSharedFlow()
 
     private val _quotes = MutableStateFlow<List<Quote>>(emptyList())
     val quotes: StateFlow<List<Quote>> = _quotes.asStateFlow()
@@ -34,10 +36,10 @@ class QuotesListViewModel @Inject constructor(
         get() = savedStateHandle.get<String>("authorId").orEmpty()
 
     init {
-        getAuthorQuote()
+        getAuthorQuote(authorId)
     }
 
-    fun getAuthorQuote() {
+    fun getAuthorQuote(authorId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             safeApi(
                 call = { quoteApi.getAuthorQuotes(authorId) },

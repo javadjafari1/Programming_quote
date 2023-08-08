@@ -1,10 +1,10 @@
 package ir.partsoftware.programmingquote.ui.screens.quotesist
 
 import android.widget.TextView
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
@@ -58,6 +59,8 @@ import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.QuoteItem
 import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun QuotesListScreen(
@@ -69,23 +72,34 @@ fun QuotesListScreen(
     var isFullImageShowing by remember { mutableStateOf(false) }
     var isInfoDialogShowing by remember { mutableStateOf(false) }
 
-    val quoteResult by viewModel.quoteResult.collectAsState()
+    val quoteResult by viewModel.quoteResult.collectAsState(Result.Idle)
     val author by viewModel.author.collectAsState()
     val quotes by viewModel.quotes.collectAsState()
 
     val scaffoldState = rememberScaffoldState()
+    val context = LocalContext.current
 
-    LaunchedEffect(quoteResult) {
-        if (quoteResult is Result.Error) {
-            val result = scaffoldState.snackbarHostState.showSnackbar(
-                (quoteResult as Result.Error).message,
-                actionLabel = "retry",
-                duration = SnackbarDuration.Indefinite
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.getAuthorQuote()
+    BackHandler(isFullImageShowing) {
+        isFullImageShowing = false
+    }
+
+    BackHandler(isFullImageShowing) {
+        isFullImageShowing = false
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.quoteResult.onEach { quoteResult ->
+            if (quoteResult is Result.Error) {
+                val result = scaffoldState.snackbarHostState.showSnackbar(
+                    quoteResult.message,
+                    actionLabel = context.getString(R.string.label_retry),
+                    duration = SnackbarDuration.Indefinite
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    viewModel.getAuthorQuote(authorId)
+                }
             }
-        }
+        }.launchIn(this)
     }
 
     Scaffold(
@@ -93,11 +107,7 @@ fun QuotesListScreen(
         topBar = {
             PQuoteAppBar(
                 title = {
-                    Text(
-                        text = authorName,
-                        color = MaterialTheme.colors.onSurface,
-                        style = MaterialTheme.typography.subtitle1,
-                    )
+                    Text(text = authorName)
                 },
                 actions = {
                     if (!author?.extract.isNullOrBlank()) {
@@ -154,13 +164,13 @@ fun QuotesListScreen(
                     AsyncImage(
                         model = author?.image.orEmpty(),
                         error = painterResource(R.drawable.ic_profile),
-                        contentDescription = "author's image",
-                        contentScale = ContentScale.Crop,
+                        contentDescription = "$authorName's image",
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .align(Alignment.Center)
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
-                            .clip(CircleShape),
+                            .clip(MaterialTheme.shapes.large),
                     )
                 }
             }
@@ -194,19 +204,21 @@ private fun AuthorDetailDialog(
                     color = MaterialTheme.colors.surface,
                     shape = MaterialTheme.shapes.medium
                 )
-                .padding(all = 24.dp)
+                .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
 
         ) {
             Text(
                 text = name,
                 style = MaterialTheme.typography.subtitle1,
-                color = MaterialTheme.colors.primary
+                color = MaterialTheme.colors.primary,
+                modifier = Modifier.padding(top = 24.dp)
             )
             Spacer(modifier = Modifier.size(16.dp))
             AndroidView(
                 factory = { context -> TextView(context) },
-                update = { it.text = HtmlCompat.fromHtml(about, HtmlCompat.FROM_HTML_MODE_COMPACT) }
+                update = { it.text = HtmlCompat.fromHtml(about, HtmlCompat.FROM_HTML_MODE_COMPACT) },
+                modifier = Modifier.padding(bottom = 24.dp)
             )
         }
     }

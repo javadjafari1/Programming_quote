@@ -26,7 +26,7 @@ class AuthorsListViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _authorResult = MutableStateFlow<Result>(Result.Idle)
-    val authorResult: StateFlow<Result> = _authorResult.asStateFlow()
+    val authorResult: SharedFlow<Result> = _authorResult.asSharedFlow()
 
     private val _randomResult = MutableSharedFlow<Result>()
     val randomResult: SharedFlow<Result> = _randomResult.asSharedFlow()

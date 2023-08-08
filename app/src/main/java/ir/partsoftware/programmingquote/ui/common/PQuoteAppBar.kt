@@ -3,6 +3,7 @@ package ir.partsoftware.programmingquote.ui.common
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,7 +24,11 @@ fun PQuoteAppBar(
         modifier = modifier,
         backgroundColor = backgroundColor,
         elevation = elevation,
-        title = title,
+        title = {
+            ProvideTextStyle(value = MaterialTheme.typography.subtitle1) {
+                title()
+            }
+        },
         actions = actions,
         navigationIcon = navigationIcon
     )

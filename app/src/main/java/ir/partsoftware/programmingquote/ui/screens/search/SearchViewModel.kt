@@ -6,13 +6,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.partsoftware.programmingquote.network.author.Author
 import ir.partsoftware.programmingquote.network.common.safeApi
 import ir.partsoftware.programmingquote.network.quote.Quote
+import ir.partsoftware.programmingquote.network.quote.QuoteResponse
 import ir.partsoftware.programmingquote.network.search.SearchApi
 import ir.partsoftware.programmingquote.ui.common.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,10 +25,10 @@ class SearchViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _searchResult = MutableStateFlow<Result>(Result.Idle)
-    val searchResult: StateFlow<Result> = _searchResult.asStateFlow()
+    val searchResult: SharedFlow<Result> = _searchResult.asSharedFlow()
 
-    private val _quotes = MutableStateFlow<List<Quote>>(emptyList())
-    val quotes: StateFlow<List<Quote>> = _quotes.asStateFlow()
+    private val _quotes = MutableStateFlow<List<QuoteResponse>>(emptyList())
+    val quotes: StateFlow<List<QuoteResponse>> = _quotes.asStateFlow()
 
     private val _authors = MutableStateFlow<List<Author>>(emptyList())
     val authors: StateFlow<List<Author>> = _authors.asStateFlow()

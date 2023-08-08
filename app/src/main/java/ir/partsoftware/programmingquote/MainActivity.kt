@@ -73,7 +73,7 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
             authorId = authorId,
             authorName = authorName,
             onQuoteClicked = { quoteId ->
-                navController.navigate(AppScreens.Quote.createRoute(quoteId))
+                navController.navigate(AppScreens.Quote.createRoute(quoteId, authorName))
             }
         )
     }
@@ -86,8 +86,8 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
                     AppScreens.QuotesList.createRoute(id, name)
                 )
             },
-            onQuoteClicked = { quoteId ->
-                navController.navigate(AppScreens.Quote.createRoute(quoteId))
+            onQuoteClicked = { quoteId, authorName ->
+                navController.navigate(AppScreens.Quote.createRoute(quoteId, authorName))
             }
         )
     }
@@ -97,13 +97,21 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
             navArgument("id") {
                 type = NavType.StringType
                 nullable = false
+            },
+            navArgument("authorName") {
+                type = NavType.StringType
+                nullable = false
+                defaultValue = ""
             }
         )
     ) { backStackEntry ->
         val id = backStackEntry.arguments?.getString("id")
             ?: throw IllegalStateException("id was null")
+        val authorName = backStackEntry.arguments?.getString("authorName")
+            ?: throw IllegalStateException("id was null")
         QuoteScreen(
-            id = id
+            id = id,
+            authorName = authorName
         )
     }
 }

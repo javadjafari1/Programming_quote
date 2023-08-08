@@ -31,7 +31,7 @@ import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 @Composable
 fun AuthorItem(
     authorName: String,
-    quotesCount: Int,
+    quotesCount: Int?,
     authorImage: String?,
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit
@@ -52,7 +52,7 @@ fun AuthorItem(
     ) {
         AsyncImage(
             model = authorImage,
-            contentDescription = "author image",
+            contentDescription = "$authorName's image",
             contentScale = ContentScale.Crop,
             error = painterResource(R.drawable.ic_profile),
             modifier = Modifier
@@ -68,13 +68,15 @@ fun AuthorItem(
                 color = MaterialTheme.colors.onSurface,
                 maxLines = 1,
             )
-            Spacer(modifier = Modifier.size(4.dp))
-            Text(
-                text = stringResource(R.string.quotes_count, quotesCount),
-                style = MaterialTheme.typography.overline,
-                color = MaterialTheme.colors.onSurface,
-                maxLines = 1,
-            )
+            if (quotesCount != null) {
+                Spacer(modifier = Modifier.size(4.dp))
+                Text(
+                    text = stringResource(R.string.quotes_count, quotesCount),
+                    style = MaterialTheme.typography.overline,
+                    color = MaterialTheme.colors.onSurface,
+                    maxLines = 1,
+                )
+            }
         }
     }
 }

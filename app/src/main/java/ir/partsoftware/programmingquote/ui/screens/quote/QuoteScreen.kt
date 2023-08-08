@@ -35,44 +35,47 @@ import ir.partsoftware.programmingquote.ui.common.AutoResizeText
 import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 
 @Composable
 fun QuoteScreen(
     id: String,
+    authorName: String,
     viewModel: QuoteViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 
     val scaffoldState = rememberScaffoldState()
 
-    val quoteResult by viewModel.quoteResult.collectAsState()
+    val quoteResult by viewModel.quoteResult.collectAsState(Result.Idle)
     val quote by viewModel.quote.collectAsState()
 
-    LaunchedEffect(quoteResult) {
-        if (quoteResult is Result.Error) {
-            val result = scaffoldState.snackbarHostState.showSnackbar(
-                (quoteResult as Result.Error).message,
-                actionLabel = "retry",
-                duration = SnackbarDuration.Indefinite
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.getQuote(id)
+    LaunchedEffect(Unit) {
+        viewModel.quoteResult.onEach { quoteResult ->
+            if (quoteResult is Result.Error) {
+                val result = scaffoldState.snackbarHostState.showSnackbar(
+                    quoteResult.message,
+                    actionLabel = context.getString(R.string.label_retry),
+                    duration = SnackbarDuration.Indefinite
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    viewModel.getQuote(id)
+                }
             }
-        }
+        }.launchIn(this)
     }
 
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            quote?.let { quote ->
-                PQuoteAppBar {
-                    Text(
-                        text = quote.author.name,
-                        color = MaterialTheme.colors.onSurface,
-                        style = MaterialTheme.typography.subtitle1
-                    )
-                }
+            PQuoteAppBar {
+                Text(
+                    text = authorName,
+                    color = MaterialTheme.colors.onSurface,
+                    style = MaterialTheme.typography.subtitle1
+                )
             }
         }
     ) {
@@ -86,8 +89,7 @@ fun QuoteScreen(
             },
             quote = quote?.quote?.text,
             quoteResult = quoteResult,
-            showWikiLink = !quote?.author?.infoUrl.isNullOrBlank(),
-            showShare = quote != null
+            showWikiLink = !quote?.author?.infoUrl.isNullOrBlank()
         )
     }
 }
@@ -99,8 +101,7 @@ private fun ScreenContent(
     onOpenWikipediaClicked: () -> Unit,
     quote: String?,
     quoteResult: Result,
-    showWikiLink: Boolean,
-    showShare: Boolean
+    showWikiLink: Boolean
 ) {
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
@@ -113,35 +114,32 @@ private fun ScreenContent(
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
 
-        AutoResizeText(
-            modifier = Modifier
-                .weight(1f),
-            text = quote.orEmpty(),
-            style = MaterialTheme.typography.h1,
-            color = MaterialTheme.colors.onBackground
-        )
+        if (quote != null) {
+            AutoResizeText(
+                modifier = Modifier
+                    .weight(1f),
+                text = quote.orEmpty(),
+                style = MaterialTheme.typography.h1,
+                color = MaterialTheme.colors.onBackground
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        if (showShare || showWikiLink) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                if (showShare) {
-                    Button(
-                        modifier = Modifier.weight(1f),
-                        onClick = onShareClicked
-                    ) {
-                        Text(
-                            text = stringResource(R.string.label_share),
-                            style = MaterialTheme.typography.button,
-                            color = MaterialTheme.colors.onPrimary,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = onShareClicked
+                ) {
+                    Text(
+                        text = stringResource(R.string.label_share),
+                        style = MaterialTheme.typography.button,
+                        color = MaterialTheme.colors.onPrimary,
+                        textAlign = TextAlign.Center
+                    )
                 }
 
                 if (showWikiLink) {
-                    if (showShare)
-                        Spacer(modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.size(16.dp))
 
                     Button(
                         modifier = Modifier.weight(1f),
@@ -164,6 +162,6 @@ private fun ScreenContent(
 @Composable
 fun QuoteScreenPreview() {
     ProgrammingQuoteTheme {
-        QuoteScreen(id = "Javad jafari")
+        QuoteScreen(id = "4hgx2bpl4qyhql5", authorName = "Javad jafari")
     }
 }

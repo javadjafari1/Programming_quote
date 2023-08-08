@@ -1,5 +1,6 @@
 package ir.partsoftware.programmingquote.ui.screens.authorslist
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,8 +36,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +53,9 @@ import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -62,13 +68,21 @@ fun AuthorsListScreen(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true
     )
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val scaffoldState = rememberScaffoldState()
 
     val randomQuote by viewModel.randomQuote.collectAsState()
     val authors by viewModel.authors.collectAsState()
-    val authorResult by viewModel.authorResult.collectAsState()
-    val randomResult by viewModel.randomResult.collectAsState(initial = Result.Idle)
+    val authorResult by viewModel.authorResult.collectAsState(Result.Idle)
+    val randomResult by viewModel.randomResult.collectAsState(Result.Idle)
+
+    BackHandler(bottomSheetState.isVisible) {
+        coroutineScope.launch {
+            bottomSheetState.hide()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.randomResult.collectLatest { result ->
@@ -88,17 +102,19 @@ fun AuthorsListScreen(
         }
     }
 
-    LaunchedEffect(authorResult) {
-        if (authorResult is Result.Error) {
-            val result = scaffoldState.snackbarHostState.showSnackbar(
-                (authorResult as Result.Error).message,
-                actionLabel = "retry",
-                duration = SnackbarDuration.Indefinite
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.getAuthors()
+    LaunchedEffect(Unit) {
+        viewModel.authorResult.onEach { authorResult ->
+            if (authorResult is Result.Error) {
+                val result = scaffoldState.snackbarHostState.showSnackbar(
+                    message = authorResult.message,
+                    actionLabel = context.getString(R.string.label_retry),
+                    duration = SnackbarDuration.Indefinite
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    viewModel.getAuthors()
+                }
             }
-        }
+        }.launchIn(this)
     }
 
     ModalBottomSheetLayout(
@@ -151,8 +167,6 @@ private fun ScreenContent(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(R.string.app_name_short),
-                        style = MaterialTheme.typography.subtitle1,
-                        color = MaterialTheme.colors.onBackground,
                         textAlign = TextAlign.Center
                     )
                 },
@@ -211,7 +225,7 @@ private fun ScreenContent(
             items(authors) { author ->
                 AuthorItem(
                     authorName = author.name,
-                    quotesCount = author.quoteCount ?: 0,
+                    quotesCount = author.quoteCount,
                     authorImage = author.image,
                     onItemClick = {
                         onAuthorClicked(author.id, author.name)
