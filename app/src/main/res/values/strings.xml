@@ -10,4 +10,5 @@
     <string name="label_share">Share</string>
     <string name="label_open_wikipedia">Open Wikipedia</string>
     <string name="suitable_app_not_found_message">Suitable app not found</string>
+    <string name="label_retry">Retry</string>
 </resources>

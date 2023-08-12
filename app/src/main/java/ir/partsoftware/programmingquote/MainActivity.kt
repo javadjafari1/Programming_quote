@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import dagger.hilt.android.AndroidEntryPoint
 import ir.partsoftware.programmingquote.core.AppScreens
 import ir.partsoftware.programmingquote.ui.screens.authorslist.AuthorsListScreen
 import ir.partsoftware.programmingquote.ui.screens.quote.QuoteScreen
@@ -18,6 +19,7 @@ import ir.partsoftware.programmingquote.ui.screens.quotesist.QuotesListScreen
 import ir.partsoftware.programmingquote.ui.screens.search.SearchScreen
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -39,9 +41,9 @@ class MainActivity : ComponentActivity() {
 private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
     composable(route = AppScreens.AuthorsList.route) {
         AuthorsListScreen(
-            onAuthorClicked = {
+            onAuthorClicked = { id, name ->
                 navController.navigate(
-                    AppScreens.QuotesList.createRoute(it)
+                    AppScreens.QuotesList.createRoute(id, name)
                 )
             },
             openSearch = { navController.navigate(AppScreens.Search.route) }
@@ -51,17 +53,27 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
         route = AppScreens.QuotesList.route,
         arguments = listOf(
             navArgument("id") {
-                type = NavType.IntType
+                type = NavType.StringType
+                defaultValue = ""
+                nullable = false
+            },
+            navArgument("name") {
+                type = NavType.StringType
+                defaultValue = ""
                 nullable = false
             }
         )
     ) { backStackEntry ->
-        val id = backStackEntry.arguments?.getInt("id")
-            ?: throw IllegalStateException("id was null")
+        val authorId = backStackEntry.arguments?.getString("authorId")
+            ?: throw IllegalStateException("authorId was null")
+        val authorName = backStackEntry.arguments?.getString("authorName")
+            ?: throw IllegalStateException("authorName was null")
+
         QuotesListScreen(
-            name = "$id. Edsger W. Dijkstra",
+            authorId = authorId,
+            authorName = authorName,
             onQuoteClicked = { quoteId ->
-                navController.navigate(AppScreens.Quote.createRoute(quoteId))
+                navController.navigate(AppScreens.Quote.createRoute(quoteId, authorName))
             }
         )
     }
@@ -69,13 +81,13 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
         route = AppScreens.Search.route
     ) {
         SearchScreen(
-            onAuthorClicked = {
+            onAuthorClicked = { id, name ->
                 navController.navigate(
-                    AppScreens.QuotesList.createRoute(it)
+                    AppScreens.QuotesList.createRoute(id, name)
                 )
             },
-            onQuoteClicked = { quoteId ->
-                navController.navigate(AppScreens.Quote.createRoute(quoteId))
+            onQuoteClicked = { quoteId, authorName ->
+                navController.navigate(AppScreens.Quote.createRoute(quoteId, authorName))
             }
         )
     }
@@ -83,15 +95,23 @@ private fun NavGraphBuilder.mainNavGraph(navController: NavController) {
         route = AppScreens.Quote.route,
         arguments = listOf(
             navArgument("id") {
-                type = NavType.IntType
+                type = NavType.StringType
                 nullable = false
+            },
+            navArgument("authorName") {
+                type = NavType.StringType
+                nullable = false
+                defaultValue = ""
             }
         )
     ) { backStackEntry ->
-        val id = backStackEntry.arguments?.getInt("id")
+        val id = backStackEntry.arguments?.getString("id")
+            ?: throw IllegalStateException("id was null")
+        val authorName = backStackEntry.arguments?.getString("authorName")
             ?: throw IllegalStateException("id was null")
         QuoteScreen(
-            name = "$id Edsger W. Dijkstra"
+            id = id,
+            authorName = authorName
         )
     }
 }

@@ -11,30 +11,43 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import ir.partsoftware.programmingquote.R
+import ir.partsoftware.programmingquote.core.SearchType
 import ir.partsoftware.programmingquote.ui.common.AuthorItem
 import ir.partsoftware.programmingquote.ui.common.PQuotesChip
 import ir.partsoftware.programmingquote.ui.common.QuoteItem
-import ir.partsoftware.programmingquote.core.SearchType
+import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -43,14 +56,39 @@ import kotlinx.coroutines.launch
 )
 @Composable
 fun SearchScreen(
-    onQuoteClicked: (Int) -> Unit,
-    onAuthorClicked: (Int) -> Unit
+    onQuoteClicked: (id: String, authorName: String) -> Unit,
+    onAuthorClicked: (id: String, name: String) -> Unit,
+    viewModel: SearchViewModel = hiltViewModel()
 ) {
-    var searchText by remember { mutableStateOf("") }
+    val searchText by viewModel.query.collectAsState()
     val pagerState = rememberPagerState()
+    val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-    Scaffold { paddingValues ->
+    val authors by viewModel.authors.collectAsState()
+    val quotes by viewModel.quotes.collectAsState()
+    val searchResult by viewModel.searchResult.collectAsState(Result.Idle)
+
+    LaunchedEffect(Unit) {
+        viewModel.searchResult.onEach { searchResult ->
+            if (searchResult is Result.Loading) {
+                scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
+            }
+            if (searchResult is Result.Error) {
+                val result = scaffoldState.snackbarHostState.showSnackbar(
+                    searchResult.message,
+                    actionLabel = context.getString(R.string.label_retry),
+                    duration = SnackbarDuration.Indefinite
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    viewModel.search()
+                }
+            }
+        }.launchIn(this)
+    }
+
+    Scaffold(scaffoldState = scaffoldState) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
@@ -62,7 +100,7 @@ fun SearchScreen(
                     .padding(top = 16.dp)
                     .fillMaxWidth(),
                 value = searchText,
-                onValueChange = { text -> searchText = text },
+                onValueChange = { text -> viewModel.updateQuery(text) },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     backgroundColor = MaterialTheme.colors.background,
                     unfocusedBorderColor = MaterialTheme.colors.surface,
@@ -76,7 +114,14 @@ fun SearchScreen(
                     )
                 },
                 textStyle = MaterialTheme.typography.subtitle1,
-                maxLines = 2
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        viewModel.search()
+                    }
+                )
             )
 
             Row(Modifier.padding(horizontal = 16.dp)) {
@@ -112,29 +157,55 @@ fun SearchScreen(
                 state = pagerState,
                 pageCount = SearchType.values().size
             ) { page ->
-                LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    if (page == SearchType.Programmer.ordinal) {
-                        items(30) {
-                            AuthorItem(
-                                authorName = "$it. Edsger W. Dijkstra",
-                                quotesCount = 24 + it,
-                                onItemClick = {
-                                    /*it represent as Id*/
-                                    onAuthorClicked(it)
-                                }
-                            )
+                if (searchResult is Result.Loading) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                } else {
+                    val noResult = hasNoResult(
+                        items = if (page == SearchType.Programmer.ordinal) authors else quotes,
+                        searchText = searchText,
+                        searchResult = searchResult
+                    )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        verticalArrangement = if (noResult) {
+                            Arrangement.Center
+                        } else {
+                            Arrangement.spacedBy(16.dp)
                         }
-                    } else if (page == SearchType.Quote.ordinal) {
-                        items(34) {
-                            QuoteItem(
-                                text = " $it women can't make a baby in one month.",
-                                onClicked = {
-                                    onQuoteClicked(it)
-                                }
-                            )
+                    ) {
+                        if (page == SearchType.Programmer.ordinal) {
+                            items(authors) { author ->
+                                AuthorItem(
+                                    authorName = author.name,
+                                    quotesCount = author.quoteCount,
+                                    authorImage = author.image,
+                                    onItemClick = {
+                                        onAuthorClicked(author.id, author.name)
+                                    }
+                                )
+                            }
+                        } else if (page == SearchType.Quote.ordinal) {
+                            items(quotes) { item ->
+                                QuoteItem(
+                                    text = item.quote.text,
+                                    authorName = item.author.name,
+                                    onClicked = {
+                                        onQuoteClicked(item.quote.id, item.author.name)
+                                    }
+                                )
+                            }
+                        }
+
+                        if (noResult) {
+                            item {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "No Item Found",
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.subtitle1
+                                )
+                            }
                         }
                     }
                 }
@@ -143,10 +214,16 @@ fun SearchScreen(
     }
 }
 
+private fun hasNoResult(
+    items: List<Any>,
+    searchText: String,
+    searchResult: Result
+) = items.isEmpty() && searchText.isNotEmpty() && searchResult is Result.Success
+
 @Preview
 @Composable
 fun SearchScreenPreview() {
     ProgrammingQuoteTheme {
-        SearchScreen(onQuoteClicked = {}, onAuthorClicked = {})
+        SearchScreen(onQuoteClicked = { _, _ -> }, onAuthorClicked = { _, _ -> })
     }
 }
