@@ -61,7 +61,7 @@ fun QuoteScreen(
                     duration = SnackbarDuration.Indefinite
                 )
                 if (result == SnackbarResult.ActionPerformed) {
-                    viewModel.getQuote(id)
+                    viewModel.fetchQuote(id)
                 }
             }
         }.launchIn(this)
@@ -82,14 +82,15 @@ fun QuoteScreen(
         ScreenContent(
             modifier = Modifier.padding(it),
             onShareClicked = {
-                context.shareText(quote?.quote?.text.orEmpty())
+                context.shareText(quote?.text.orEmpty())
             },
             onOpenWikipediaClicked = {
-                context.openUrl(quote?.author?.infoUrl.orEmpty())
+                context.openUrl("quote?.author?.infoUrl.orEmpty()")
             },
-            quote = quote?.quote?.text,
+            quote = quote?.text,
             quoteResult = quoteResult,
-            showWikiLink = !quote?.author?.infoUrl.isNullOrBlank()
+            showWikiLink = false
+//            showWikiLink = !quote?.author?.infoUrl.isNullOrBlank()
         )
     }
 }
@@ -109,10 +110,6 @@ private fun ScreenContent(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-
-        if (quoteResult is Result.Loading) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        }
 
         if (quote != null) {
             AutoResizeText(
@@ -155,6 +152,9 @@ private fun ScreenContent(
                 }
             }
         }
+    }
+    if (quoteResult is Result.Loading) {
+        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
     }
 }
 

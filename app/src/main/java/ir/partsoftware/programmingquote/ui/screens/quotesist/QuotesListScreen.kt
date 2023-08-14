@@ -54,7 +54,7 @@ import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import ir.partsoftware.programmingquote.R
-import ir.partsoftware.programmingquote.network.quote.Quote
+import ir.partsoftware.programmingquote.database.quote.QuoteEntity
 import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.QuoteItem
 import ir.partsoftware.programmingquote.ui.common.Result
@@ -96,7 +96,7 @@ fun QuotesListScreen(
                     duration = SnackbarDuration.Indefinite
                 )
                 if (result == SnackbarResult.ActionPerformed) {
-                    viewModel.getAuthorQuote(authorId)
+                    viewModel.fetchAuthorQuotes(authorId)
                 }
             }
         }.launchIn(this)
@@ -217,7 +217,9 @@ private fun AuthorDetailDialog(
             Spacer(modifier = Modifier.size(16.dp))
             AndroidView(
                 factory = { context -> TextView(context) },
-                update = { it.text = HtmlCompat.fromHtml(about, HtmlCompat.FROM_HTML_MODE_COMPACT) },
+                update = {
+                    it.text = HtmlCompat.fromHtml(about, HtmlCompat.FROM_HTML_MODE_COMPACT)
+                },
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
@@ -229,13 +231,8 @@ private fun ScreenContent(
     modifier: Modifier = Modifier,
     onQuoteClicked: (String) -> Unit,
     quoteResult: Result,
-    quotes: List<Quote>
+    quotes: List<QuoteEntity>
 ) {
-    if (quoteResult is Result.Loading) {
-        LinearProgressIndicator(
-            modifier = modifier.fillMaxWidth()
-        )
-    }
     LazyColumn(
         modifier = modifier
             .padding(horizontal = 16.dp),
@@ -249,6 +246,11 @@ private fun ScreenContent(
                 }
             )
         }
+    }
+    if (quoteResult is Result.Loading) {
+        LinearProgressIndicator(
+            modifier = modifier.fillMaxWidth()
+        )
     }
 }
 
