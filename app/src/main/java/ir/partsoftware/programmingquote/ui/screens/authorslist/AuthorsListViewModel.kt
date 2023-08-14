@@ -43,6 +43,7 @@ class AuthorsListViewModel @Inject constructor(
 
     fun getAuthors() {
         viewModelScope.launch(Dispatchers.IO) {
+
             safeApi(
                 call = { authorApi.getAuthors() },
                 onDataReady = { _authors.value = it }
