@@ -50,7 +50,7 @@ fun QuoteScreen(
     val scaffoldState = rememberScaffoldState()
 
     val quoteResult by viewModel.quoteResult.collectAsState(Result.Idle)
-    val quote by viewModel.quote.collectAsState()
+    val quoteWithAuthor by viewModel.quoteWithAuthor.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.quoteResult.onEach { quoteResult ->
@@ -82,15 +82,14 @@ fun QuoteScreen(
         ScreenContent(
             modifier = Modifier.padding(it),
             onShareClicked = {
-                context.shareText(quote?.text.orEmpty())
+                context.shareText(quoteWithAuthor?.quoteEntity?.text.orEmpty())
             },
             onOpenWikipediaClicked = {
-                context.openUrl("quote?.author?.infoUrl.orEmpty()")
+                context.openUrl(quoteWithAuthor?.authorEntity?.infoUrl.orEmpty())
             },
-            quote = quote?.text,
+            quote = quoteWithAuthor?.quoteEntity?.text,
             quoteResult = quoteResult,
-            showWikiLink = false
-//            showWikiLink = !quote?.author?.infoUrl.isNullOrBlank()
+            showWikiLink = !quoteWithAuthor?.authorEntity?.infoUrl.isNullOrBlank()
         )
     }
 }

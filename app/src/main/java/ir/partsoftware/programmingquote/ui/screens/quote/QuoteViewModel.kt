@@ -7,6 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.partsoftware.programmingquote.database.author.AuthorDao
 import ir.partsoftware.programmingquote.database.quote.QuoteDao
 import ir.partsoftware.programmingquote.database.quote.QuoteEntity
+import ir.partsoftware.programmingquote.database.relation.QuoteWithAuthor
+import ir.partsoftware.programmingquote.network.author.toAuthorEntity
 import ir.partsoftware.programmingquote.network.common.safeApi
 import ir.partsoftware.programmingquote.network.quote.QuoteApi
 import ir.partsoftware.programmingquote.network.quote.toQuoteEntity
@@ -22,7 +24,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class QuoteViewModel @Inject constructor(
-    private val authorDao: AuthorDao,
     private val quoteDao: QuoteDao,
     private val quoteApi: QuoteApi,
     private val savedStateHandle: SavedStateHandle
@@ -30,8 +31,8 @@ class QuoteViewModel @Inject constructor(
     private val _quoteResult = MutableStateFlow<Result>(Result.Idle)
     val quoteResult: SharedFlow<Result> = _quoteResult.asSharedFlow()
 
-    private val _quote = MutableStateFlow<QuoteEntity?>(null)
-    val quote: StateFlow<QuoteEntity?> = _quote.asStateFlow()
+    private val _quoteWithAuthor = MutableStateFlow<QuoteWithAuthor?>(null)
+    val quoteWithAuthor: StateFlow<QuoteWithAuthor?> = _quoteWithAuthor.asStateFlow()
 
     private val id: String get() = savedStateHandle.get<String>("id").orEmpty()
 
@@ -42,7 +43,9 @@ class QuoteViewModel @Inject constructor(
 
     private fun getQuote(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            quoteDao.getQuote(id).collect(_quote)
+            quoteDao.getQuoteWithAuthor(id).collect {
+                _quoteWithAuthor.emit(it)
+            }
         }
     }
 
@@ -52,7 +55,11 @@ class QuoteViewModel @Inject constructor(
                 call = { quoteApi.getQuoteById(id) },
                 onDataReady = {
                     val quoteEntity = it.quote.toQuoteEntity()
-                    _quote.value = quoteEntity
+                    _quoteWithAuthor.value = QuoteWithAuthor(
+                        quoteEntity = quoteEntity,
+                        authorEntity = it.author.toAuthorEntity()
+                    )
+
                     storeQuote(quoteEntity)
                 }
             ).collect(_quoteResult)

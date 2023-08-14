@@ -4,6 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
+import ir.partsoftware.programmingquote.database.relation.QuoteWithAuthor
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -19,4 +21,8 @@ interface QuoteDao {
 
     @Query("select * from quotes where id=:id")
     fun getQuote(id: String): Flow<QuoteEntity>
+
+    @Transaction
+    @Query("select * from quotes where id=:id")
+    fun getQuoteWithAuthor(id: String): Flow<QuoteWithAuthor>
 }
