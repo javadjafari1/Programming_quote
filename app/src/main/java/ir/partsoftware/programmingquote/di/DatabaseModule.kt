@@ -8,7 +8,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ir.partsoftware.programmingquote.core.AppDatabase
-import ir.partsoftware.programmingquote.database.author.AuthorDao
 import javax.inject.Singleton
 
 @Module

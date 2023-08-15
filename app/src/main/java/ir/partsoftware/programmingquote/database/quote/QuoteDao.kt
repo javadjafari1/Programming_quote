@@ -17,12 +17,12 @@ interface QuoteDao {
     suspend fun insertQuote(quote: QuoteEntity)
 
     @Query("select * from quotes")
-    fun getQuotes(): Flow<List<QuoteEntity>>
+    fun observeQuotes(): Flow<List<QuoteEntity>>
 
     @Query("select * from quotes where id=:id")
-    fun getQuote(id: String): Flow<QuoteEntity>
+    fun observeQuote(id: String): Flow<QuoteEntity>
 
     @Transaction
     @Query("select * from quotes where id=:id")
-    fun getQuoteWithAuthor(id: String): Flow<QuoteWithAuthor>
+    fun observeQuoteWithAuthor(id: String): Flow<QuoteWithAuthor>
 }

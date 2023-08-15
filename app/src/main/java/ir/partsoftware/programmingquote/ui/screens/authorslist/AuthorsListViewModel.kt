@@ -41,8 +41,14 @@ class AuthorsListViewModel @Inject constructor(
     val randomQuote: StateFlow<QuoteResponse?> = _randomQuote.asStateFlow()
 
     init {
-        getAuthors()
+        observeAuthors()
         fetchAuthors()
+    }
+
+    private fun observeAuthors() {
+        viewModelScope.launch {
+            authorDao.observeAuthors().collect(_authors)
+        }
     }
 
     fun fetchAuthors() {
@@ -59,11 +65,6 @@ class AuthorsListViewModel @Inject constructor(
         }
     }
 
-    private fun getAuthors() {
-        viewModelScope.launch {
-            authorDao.getAuthors().collect(_authors)
-        }
-    }
 
     private fun storeAuthors(authors: List<AuthorEntity>) {
         viewModelScope.launch(Dispatchers.IO) {

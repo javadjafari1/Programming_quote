@@ -17,10 +17,10 @@ interface AuthorDao {
     suspend fun insertAuthor(author: AuthorEntity)
 
     @Query("select * from authors")
-    fun getAuthors(): Flow<List<AuthorEntity>>
+    fun observeAuthors(): Flow<List<AuthorEntity>>
 
     @Transaction
     @Query("select * from authors where id=:id limit 1")
-    fun getAuthorWithQuotes(id: String): Flow<AuthorWithQuotes>
+    fun observeAuthorWithQuotes(id: String): Flow<AuthorWithQuotes>
 
 }

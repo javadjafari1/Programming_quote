@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import ir.partsoftware.programmingquote.database.author.AuthorDao
 import ir.partsoftware.programmingquote.database.quote.QuoteDao
 import ir.partsoftware.programmingquote.database.quote.QuoteEntity
 import ir.partsoftware.programmingquote.database.relation.QuoteWithAuthor
@@ -37,15 +36,13 @@ class QuoteViewModel @Inject constructor(
     private val id: String get() = savedStateHandle.get<String>("id").orEmpty()
 
     init {
-        getQuote(id)
+        observeQuote(id)
         fetchQuote(id)
     }
 
-    private fun getQuote(id: String) {
+    private fun observeQuote(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            quoteDao.getQuoteWithAuthor(id).collect {
-                _quoteWithAuthor.emit(it)
-            }
+            quoteDao.observeQuoteWithAuthor(id).collect(_quoteWithAuthor)
         }
     }
 
@@ -55,11 +52,11 @@ class QuoteViewModel @Inject constructor(
                 call = { quoteApi.getQuoteById(id) },
                 onDataReady = {
                     val quoteEntity = it.quote.toQuoteEntity()
+                    val authorEntity = it.author.toAuthorEntity()
                     _quoteWithAuthor.value = QuoteWithAuthor(
                         quoteEntity = quoteEntity,
-                        authorEntity = it.author.toAuthorEntity()
+                        authorEntity = authorEntity
                     )
-
                     storeQuote(quoteEntity)
                 }
             ).collect(_quoteResult)

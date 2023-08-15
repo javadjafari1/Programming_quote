@@ -41,14 +41,14 @@ class QuotesListViewModel @Inject constructor(
         get() = savedStateHandle.get<String>("authorId").orEmpty()
 
     init {
-        getAuthorQuotes(authorId)
+        observeAuthorQuotes(authorId)
         fetchAuthorQuotes(authorId)
     }
 
-    private fun getAuthorQuotes(authorId: String) {
+    private fun observeAuthorQuotes(authorId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            authorDao.getAuthorWithQuotes(authorId).collect {
-                _quotes.emit(it.quotes)
+            authorDao.observeAuthorWithQuotes(authorId).collect {
+                _quotes.emit(it.quoteEntities)
             }
         }
     }
