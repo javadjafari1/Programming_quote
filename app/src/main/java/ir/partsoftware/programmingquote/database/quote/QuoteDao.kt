@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import ir.partsoftware.programmingquote.database.relation.QuoteWithAuthor
 import kotlinx.coroutines.flow.Flow
 
@@ -13,8 +14,8 @@ interface QuoteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertQuotes(quotes: List<QuoteEntity>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertQuote(quote: QuoteEntity)
+    @Update
+    suspend fun updateQuote(quote: QuoteEntity)
 
     @Query("select * from quotes")
     fun observeQuotes(): Flow<List<QuoteEntity>>
