@@ -82,14 +82,14 @@ fun QuoteScreen(
         ScreenContent(
             modifier = Modifier.padding(it),
             onShareClicked = {
-                context.shareText(quoteWithAuthor?.quoteEntity?.text.orEmpty())
+                context.shareText(quoteWithAuthor?.quote?.text.orEmpty())
             },
             onOpenWikipediaClicked = {
-                context.openUrl(quoteWithAuthor?.authorEntity?.infoUrl.orEmpty())
+                context.openUrl(quoteWithAuthor?.author?.infoUrl.orEmpty())
             },
-            quote = quoteWithAuthor?.quoteEntity?.text,
+            quote = quoteWithAuthor?.quote?.text,
             quoteResult = quoteResult,
-            showWikiLink = !quoteWithAuthor?.authorEntity?.infoUrl.isNullOrBlank()
+            showWikiLink = !quoteWithAuthor?.author?.infoUrl.isNullOrBlank()
         )
     }
 }

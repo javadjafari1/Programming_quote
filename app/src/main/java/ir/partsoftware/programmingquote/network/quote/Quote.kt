@@ -10,4 +10,8 @@ data class Quote(
     val author: String
 )
 
-fun Quote.toQuoteEntity() = QuoteEntity(id = id, text = text, author = author)
+fun Quote.toQuoteEntity() = QuoteEntity(
+    id = id,
+    text = text,
+    authorId = author
+)

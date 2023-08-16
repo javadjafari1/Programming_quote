@@ -54,8 +54,8 @@ class QuoteViewModel @Inject constructor(
                     val quoteEntity = it.quote.toQuoteEntity()
                     val authorEntity = it.author.toAuthorEntity()
                     _quoteWithAuthor.value = QuoteWithAuthor(
-                        quoteEntity = quoteEntity,
-                        authorEntity = authorEntity
+                        quote = quoteEntity,
+                        author = authorEntity
                     )
                     storeQuote(quoteEntity)
                 }

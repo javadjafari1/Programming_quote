@@ -48,7 +48,7 @@ class QuotesListViewModel @Inject constructor(
     private fun observeAuthorQuotes(authorId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             authorDao.observeAuthorWithQuotes(authorId).collect {
-                _quotes.emit(it.quoteEntities)
+                _quotes.emit(it.quotes)
             }
         }
     }

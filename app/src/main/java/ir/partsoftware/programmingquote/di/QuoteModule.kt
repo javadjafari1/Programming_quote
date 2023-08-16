@@ -20,11 +20,6 @@ object QuoteModule {
     }
 
     @Provides
-    fun provideAuthorDao(appDatabase: AppDatabase): AuthorDao {
-        return appDatabase.authorDao()
-    }
-
-    @Provides
     fun provideQuoteDao(appDatabase: AppDatabase): QuoteDao {
         return appDatabase.quoteDao()
     }
