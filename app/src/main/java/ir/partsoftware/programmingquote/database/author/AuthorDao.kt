@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import ir.partsoftware.programmingquote.database.relation.AuthorWithQuotes
 import kotlinx.coroutines.flow.Flow
 
@@ -18,6 +19,9 @@ interface AuthorDao {
 
     @Query("select * from authors")
     fun observeAuthors(): Flow<List<AuthorEntity>>
+
+    @Update
+    fun updateAuthor(author: AuthorEntity)
 
     @Transaction
     @Query("select * from authors where id=:id limit 1")

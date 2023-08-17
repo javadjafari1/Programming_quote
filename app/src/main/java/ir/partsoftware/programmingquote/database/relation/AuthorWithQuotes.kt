@@ -9,7 +9,7 @@ data class AuthorWithQuotes(
     @Embedded val author: AuthorEntity,
     @Relation(
         parentColumn = "id",
-        entityColumn = "author"
+        entityColumn = "authorId"
     )
     val quotes: List<QuoteEntity>
 )

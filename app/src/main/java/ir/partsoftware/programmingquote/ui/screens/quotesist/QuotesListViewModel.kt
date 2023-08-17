@@ -5,9 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.partsoftware.programmingquote.database.author.AuthorDao
+import ir.partsoftware.programmingquote.database.author.AuthorEntity
 import ir.partsoftware.programmingquote.database.quote.QuoteDao
 import ir.partsoftware.programmingquote.database.quote.QuoteEntity
-import ir.partsoftware.programmingquote.network.author.Author
+import ir.partsoftware.programmingquote.network.author.toAuthorEntity
 import ir.partsoftware.programmingquote.network.common.safeApi
 import ir.partsoftware.programmingquote.network.quote.QuoteApi
 import ir.partsoftware.programmingquote.network.quote.toQuoteEntity
@@ -34,8 +35,8 @@ class QuotesListViewModel @Inject constructor(
     private val _quotes = MutableStateFlow<List<QuoteEntity>>(emptyList())
     val quotes: StateFlow<List<QuoteEntity>> = _quotes.asStateFlow()
 
-    private val _author = MutableStateFlow<Author?>(null)
-    val author: StateFlow<Author?> = _author.asStateFlow()
+    private val _author = MutableStateFlow<AuthorEntity?>(null)
+    val author: StateFlow<AuthorEntity?> = _author.asStateFlow()
 
     private val authorId: String
         get() = savedStateHandle.get<String>("authorId").orEmpty()
@@ -59,9 +60,11 @@ class QuotesListViewModel @Inject constructor(
                 call = { quoteApi.getAuthorQuotes(authorId) },
                 onDataReady = {
                     val quoteEntities = it.quotes.map { it.toQuoteEntity() }
-                    _author.value = it.author
+                    val authorEntity = it.author.toAuthorEntity()
+                    _author.value = authorEntity
                     _quotes.value = quoteEntities
                     storeQuotes(quoteEntities)
+                    storeAuthor(authorEntity)
                 }
             ).collect(_quoteResult)
         }
@@ -70,6 +73,12 @@ class QuotesListViewModel @Inject constructor(
     private fun storeQuotes(quotes: List<QuoteEntity>) {
         viewModelScope.launch(Dispatchers.IO) {
             quoteDao.insertQuotes(quotes)
+        }
+    }
+
+    private fun storeAuthor(authorEntity: AuthorEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            authorDao.updateAuthor(authorEntity)
         }
     }
 }

@@ -7,6 +7,6 @@ import ir.partsoftware.programmingquote.database.quote.QuoteEntity
 
 data class QuoteWithAuthor(
     @Embedded val quote: QuoteEntity,
-    @Relation(parentColumn = "author", entityColumn = "id")
+    @Relation(parentColumn = "authorId", entityColumn = "id")
     val author: AuthorEntity
 )
