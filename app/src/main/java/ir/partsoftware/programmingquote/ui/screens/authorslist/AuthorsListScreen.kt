@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ir.partsoftware.programmingquote.R
 import ir.partsoftware.programmingquote.database.author.AuthorEntity
-import ir.partsoftware.programmingquote.network.author.Author
 import ir.partsoftware.programmingquote.ui.common.AuthorItem
 import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.Result
@@ -109,7 +108,10 @@ fun AuthorsListScreen(
                 val result = scaffoldState.snackbarHostState.showSnackbar(
                     message = authorResult.message,
                     actionLabel = context.getString(R.string.label_retry),
-                    duration = SnackbarDuration.Indefinite
+                    duration = if (authors.isNotEmpty())
+                        SnackbarDuration.Long
+                    else
+                        SnackbarDuration.Indefinite
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     viewModel.fetchAuthors()
