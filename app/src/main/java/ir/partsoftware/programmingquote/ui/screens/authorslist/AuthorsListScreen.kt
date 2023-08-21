@@ -108,10 +108,11 @@ fun AuthorsListScreen(
                 val result = scaffoldState.snackbarHostState.showSnackbar(
                     message = authorResult.message,
                     actionLabel = context.getString(R.string.label_retry),
-                    duration = if (authors.isNotEmpty())
+                    duration = if (authors.isNotEmpty()) {
                         SnackbarDuration.Long
-                    else
+                    } else {
                         SnackbarDuration.Indefinite
+                    }
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     viewModel.fetchAuthors()

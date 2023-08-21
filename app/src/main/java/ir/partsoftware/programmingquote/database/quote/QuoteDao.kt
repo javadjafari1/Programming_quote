@@ -20,9 +20,6 @@ interface QuoteDao {
     @Query("select * from quotes")
     fun observeQuotes(): Flow<List<QuoteEntity>>
 
-    @Query("select * from quotes where id=:id")
-    fun observeQuote(id: String): Flow<QuoteEntity>
-
     @Transaction
     @Query("select * from quotes where id=:id")
     fun observeQuoteWithAuthor(id: String): Flow<QuoteWithAuthor>

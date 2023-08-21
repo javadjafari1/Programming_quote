@@ -58,7 +58,7 @@ fun QuoteScreen(
                 val result = scaffoldState.snackbarHostState.showSnackbar(
                     quoteResult.message,
                     actionLabel = context.getString(R.string.label_retry),
-                    duration = SnackbarDuration.Indefinite
+                    duration = SnackbarDuration.Long
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     viewModel.fetchQuote(id)
