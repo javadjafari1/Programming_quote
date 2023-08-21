@@ -114,7 +114,7 @@ private fun ScreenContent(
             AutoResizeText(
                 modifier = Modifier
                     .weight(1f),
-                text = quote.orEmpty(),
+                text = quote,
                 style = MaterialTheme.typography.h1,
                 color = MaterialTheme.colors.onBackground
             )
