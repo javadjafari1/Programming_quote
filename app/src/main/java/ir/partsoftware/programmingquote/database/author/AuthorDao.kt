@@ -21,7 +21,7 @@ interface AuthorDao {
     fun observeAuthors(): Flow<List<AuthorEntity>>
 
     @Update
-    fun updateAuthor(author: AuthorEntity)
+    suspend fun updateAuthor(author: AuthorEntity)
 
     @Transaction
     @Query("select * from authors where id=:id limit 1")
