@@ -9,10 +9,8 @@ import ir.partsoftware.programmingquote.database.author.AuthorEntity
 import ir.partsoftware.programmingquote.database.quote.QuoteDao
 import ir.partsoftware.programmingquote.database.quote.QuoteEntity
 import ir.partsoftware.programmingquote.database.relation.QuoteWithAuthor
-import ir.partsoftware.programmingquote.network.author.toAuthorEntity
 import ir.partsoftware.programmingquote.network.common.safeApi
 import ir.partsoftware.programmingquote.network.quote.QuoteApi
-import ir.partsoftware.programmingquote.network.quote.toQuoteEntity
 import ir.partsoftware.programmingquote.ui.common.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,8 +52,8 @@ class QuoteViewModel @Inject constructor(
             safeApi(
                 call = { quoteApi.getQuoteById(id) },
                 onDataReady = {
-                    val quoteEntity = it.quote.toQuoteEntity()
-                    val authorEntity = it.author.toAuthorEntity()
+                    val quoteEntity = it.quoteResponse.toQuoteEntity()
+                    val authorEntity = it.authorResponse.toAuthorEntity()
                     _quoteWithAuthor.value = QuoteWithAuthor(
                         quote = quoteEntity,
                         author = authorEntity

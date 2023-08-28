@@ -139,8 +139,8 @@ fun AuthorsListScreen(
         sheetContent = {
             randomQuote?.let {
                 RandomQuote(
-                    authorName = it.author.name,
-                    quote = it.quote.text
+                    authorName = it.authorResponse.name,
+                    quote = it.quoteResponse.text
                 )
             }
         },

@@ -9,6 +9,6 @@ interface AuthorApi {
     @GET("v1/author")
     suspend fun getAuthors(
         @Query("count") count: Int? = null // 100
-    ): Response<List<Author>>
+    ): Response<List<AuthorResponse>>
 
 }
