@@ -2,6 +2,7 @@ package ir.partsoftware.programmingquote.ui.screens.authorslist
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -214,28 +215,30 @@ private fun ScreenContent(
         },
         floatingActionButtonPosition = FabPosition.Center,
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(authors) { author ->
-                AuthorItem(
-                    authorName = author.name,
-                    quotesCount = author.quoteCount,
-                    authorImage = author.image,
-                    onItemClick = {
-                        onAuthorClicked(author.id, author.name)
-                    }
+        Box(modifier = Modifier.padding(paddingValues)) {
+            if (authorResult is Result.Loading) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-        }
-        if (authorResult is Result.Loading) {
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth()
-            )
+            LazyColumn(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(authors) { author ->
+                    AuthorItem(
+                        authorName = author.name,
+                        quotesCount = author.quoteCount,
+                        authorImage = author.image,
+                        onItemClick = {
+                            onAuthorClicked(author.id, author.name)
+                        }
+                    )
+                }
+            }
         }
     }
 }
