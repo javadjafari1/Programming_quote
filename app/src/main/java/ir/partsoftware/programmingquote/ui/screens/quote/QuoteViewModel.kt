@@ -52,8 +52,8 @@ class QuoteViewModel @Inject constructor(
             safeApi(
                 call = { quoteApi.getQuoteById(id) },
                 onDataReady = {
-                    val quoteEntity = it.quoteResponse.toQuoteEntity()
-                    val authorEntity = it.authorResponse.toAuthorEntity()
+                    val quoteEntity = it.quote.toQuoteEntity()
+                    val authorEntity = it.author.toAuthorEntity()
                     _quoteWithAuthor.value = QuoteWithAuthor(
                         quote = quoteEntity,
                         author = authorEntity

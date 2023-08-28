@@ -5,6 +5,6 @@ import ir.partsoftware.programmingquote.network.author.AuthorResponse
 
 @JsonClass(generateAdapter = true)
 data class QuoteAuthorResponse(
-    val authorResponse: AuthorResponse,
-    val quoteResponse: QuoteResponse
+    val author: AuthorResponse,
+    val quote: QuoteResponse
 )

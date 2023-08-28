@@ -57,8 +57,8 @@ class QuotesListViewModel @Inject constructor(
             safeApi(
                 call = { quoteApi.getAuthorQuotes(authorId) },
                 onDataReady = {
-                    val quoteEntities = it.quoteResponses.map { it.toQuoteEntity() }
-                    val authorEntity = it.authorResponse.toAuthorEntity()
+                    val quoteEntities = it.quotes.map { it.toQuoteEntity() }
+                    val authorEntity = it.author.toAuthorEntity()
                     _author.value = authorEntity
                     _quotes.value = quoteEntities
                     storeQuotes(quoteEntities)

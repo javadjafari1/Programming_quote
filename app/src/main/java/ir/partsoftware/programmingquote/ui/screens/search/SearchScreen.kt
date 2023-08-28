@@ -188,10 +188,10 @@ fun SearchScreen(
                         } else if (page == SearchType.Quote.ordinal) {
                             items(quotes) { item ->
                                 QuoteItem(
-                                    text = item.quoteResponse.text,
-                                    authorName = item.authorResponse.name,
+                                    text = item.quote.text,
+                                    authorName = item.author.name,
                                     onClicked = {
-                                        onQuoteClicked(item.quoteResponse.id, item.authorResponse.name)
+                                        onQuoteClicked(item.quote.id, item.author.name)
                                     }
                                 )
                             }

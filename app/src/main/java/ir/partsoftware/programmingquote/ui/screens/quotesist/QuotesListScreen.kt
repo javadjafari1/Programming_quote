@@ -237,24 +237,27 @@ private fun ScreenContent(
     quoteResult: Result,
     quotes: List<QuoteEntity>
 ) {
-    LazyColumn(
-        modifier = modifier
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        items(quotes) { quote ->
-            QuoteItem(
-                text = quote.text,
-                onClicked = {
-                    onQuoteClicked(quote.id)
-                }
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (quoteResult is Result.Loading) {
+            LinearProgressIndicator(
+                modifier = modifier.fillMaxWidth()
             )
         }
-    }
-    if (quoteResult is Result.Loading) {
-        LinearProgressIndicator(
-            modifier = modifier.fillMaxWidth()
-        )
+        LazyColumn(
+            modifier = modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(quotes) { quote ->
+                QuoteItem(
+                    text = quote.text,
+                    onClicked = {
+                        onQuoteClicked(quote.id)
+                    }
+                )
+            }
+        }
     }
 }
 
