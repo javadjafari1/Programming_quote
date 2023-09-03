@@ -54,7 +54,7 @@ import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import ir.partsoftware.programmingquote.R
-import ir.partsoftware.programmingquote.network.quote.Quote
+import ir.partsoftware.programmingquote.database.quote.QuoteEntity
 import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.QuoteItem
 import ir.partsoftware.programmingquote.ui.common.Result
@@ -93,10 +93,14 @@ fun QuotesListScreen(
                 val result = scaffoldState.snackbarHostState.showSnackbar(
                     quoteResult.message,
                     actionLabel = context.getString(R.string.label_retry),
-                    duration = SnackbarDuration.Indefinite
+                    duration = if (quotes.isEmpty()) {
+                        SnackbarDuration.Indefinite
+                    } else {
+                        SnackbarDuration.Long
+                    }
                 )
                 if (result == SnackbarResult.ActionPerformed) {
-                    viewModel.getAuthorQuote(authorId)
+                    viewModel.fetchAuthorQuotes(authorId)
                 }
             }
         }.launchIn(this)
@@ -217,7 +221,9 @@ private fun AuthorDetailDialog(
             Spacer(modifier = Modifier.size(16.dp))
             AndroidView(
                 factory = { context -> TextView(context) },
-                update = { it.text = HtmlCompat.fromHtml(about, HtmlCompat.FROM_HTML_MODE_COMPACT) },
+                update = {
+                    it.text = HtmlCompat.fromHtml(about, HtmlCompat.FROM_HTML_MODE_COMPACT)
+                },
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
@@ -229,25 +235,28 @@ private fun ScreenContent(
     modifier: Modifier = Modifier,
     onQuoteClicked: (String) -> Unit,
     quoteResult: Result,
-    quotes: List<Quote>
+    quotes: List<QuoteEntity>
 ) {
-    if (quoteResult is Result.Loading) {
-        LinearProgressIndicator(
-            modifier = modifier.fillMaxWidth()
-        )
-    }
-    LazyColumn(
-        modifier = modifier
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        items(quotes) { quote ->
-            QuoteItem(
-                text = quote.text,
-                onClicked = {
-                    onQuoteClicked(quote.id)
-                }
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (quoteResult is Result.Loading) {
+            LinearProgressIndicator(
+                modifier = modifier.fillMaxWidth()
             )
+        }
+        LazyColumn(
+            modifier = modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(quotes) { quote ->
+                QuoteItem(
+                    text = quote.text,
+                    onClicked = {
+                        onQuoteClicked(quote.id)
+                    }
+                )
+            }
         }
     }
 }

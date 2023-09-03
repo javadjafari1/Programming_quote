@@ -3,10 +3,9 @@ package ir.partsoftware.programmingquote.ui.screens.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import ir.partsoftware.programmingquote.network.author.Author
+import ir.partsoftware.programmingquote.network.author.AuthorResponse
 import ir.partsoftware.programmingquote.network.common.safeApi
-import ir.partsoftware.programmingquote.network.quote.Quote
-import ir.partsoftware.programmingquote.network.quote.QuoteResponse
+import ir.partsoftware.programmingquote.network.quote.QuoteAuthorResponse
 import ir.partsoftware.programmingquote.network.search.SearchApi
 import ir.partsoftware.programmingquote.ui.common.Result
 import kotlinx.coroutines.Dispatchers
@@ -27,11 +26,11 @@ class SearchViewModel @Inject constructor(
     private val _searchResult = MutableStateFlow<Result>(Result.Idle)
     val searchResult: SharedFlow<Result> = _searchResult.asSharedFlow()
 
-    private val _quotes = MutableStateFlow<List<QuoteResponse>>(emptyList())
-    val quotes: StateFlow<List<QuoteResponse>> = _quotes.asStateFlow()
+    private val _quotes = MutableStateFlow<List<QuoteAuthorResponse>>(emptyList())
+    val quotes: StateFlow<List<QuoteAuthorResponse>> = _quotes.asStateFlow()
 
-    private val _authors = MutableStateFlow<List<Author>>(emptyList())
-    val authors: StateFlow<List<Author>> = _authors.asStateFlow()
+    private val _authors = MutableStateFlow<List<AuthorResponse>>(emptyList())
+    val authors: StateFlow<List<AuthorResponse>> = _authors.asStateFlow()
 
     private val _query = MutableStateFlow<String>("")
     val query: StateFlow<String> = _query.asStateFlow()
@@ -45,7 +44,7 @@ class SearchViewModel @Inject constructor(
             safeApi(
                 call = { searchApi.search(query.value) },
                 onDataReady = {
-                    _authors.value = it.authors
+                    _authors.value = it.authorResponses
                     _quotes.value = it.quotes
                 }
             ).collect(_searchResult)

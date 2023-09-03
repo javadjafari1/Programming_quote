@@ -4,9 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ir.partsoftware.programmingquote.database.author.AuthorDao
+import ir.partsoftware.programmingquote.database.author.AuthorEntity
+import ir.partsoftware.programmingquote.database.quote.QuoteDao
+import ir.partsoftware.programmingquote.database.quote.QuoteEntity
+import ir.partsoftware.programmingquote.database.relation.QuoteWithAuthor
 import ir.partsoftware.programmingquote.network.common.safeApi
 import ir.partsoftware.programmingquote.network.quote.QuoteApi
-import ir.partsoftware.programmingquote.network.quote.QuoteResponse
 import ir.partsoftware.programmingquote.ui.common.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,27 +23,57 @@ import javax.inject.Inject
 
 @HiltViewModel
 class QuoteViewModel @Inject constructor(
+    private val quoteDao: QuoteDao,
+    private val authorDao: AuthorDao,
     private val quoteApi: QuoteApi,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _quoteResult = MutableStateFlow<Result>(Result.Idle)
     val quoteResult: SharedFlow<Result> = _quoteResult.asSharedFlow()
 
-    private val _quote = MutableStateFlow<QuoteResponse?>(null)
-    val quote: StateFlow<QuoteResponse?> = _quote.asStateFlow()
+    private val _quoteWithAuthor = MutableStateFlow<QuoteWithAuthor?>(null)
+    val quoteWithAuthor: StateFlow<QuoteWithAuthor?> = _quoteWithAuthor.asStateFlow()
 
     private val id: String get() = savedStateHandle.get<String>("id").orEmpty()
 
     init {
-        getQuote(id)
+        observeQuote(id)
+        fetchQuote(id)
     }
 
-    fun getQuote(id: String) {
+    private fun observeQuote(id: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            quoteDao.observeQuoteWithAuthor(id).collect(_quoteWithAuthor)
+        }
+    }
+
+    fun fetchQuote(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             safeApi(
                 call = { quoteApi.getQuoteById(id) },
-                onDataReady = { _quote.value = it }
+                onDataReady = {
+                    val quoteEntity = it.quote.toQuoteEntity()
+                    val authorEntity = it.author.toAuthorEntity()
+                    _quoteWithAuthor.value = QuoteWithAuthor(
+                        quote = quoteEntity,
+                        author = authorEntity
+                    )
+                    storeQuote(quoteEntity)
+                    storeAuthor(authorEntity)
+                }
             ).collect(_quoteResult)
+        }
+    }
+
+    private fun storeQuote(quoteEntity: QuoteEntity) {
+        viewModelScope.launch {
+            quoteDao.updateQuote(quoteEntity)
+        }
+    }
+
+    private fun storeAuthor(author: AuthorEntity) {
+        viewModelScope.launch {
+            authorDao.updateAuthor(author)
         }
     }
 }

@@ -4,7 +4,7 @@ import com.squareup.moshi.JsonClass
 import ir.partsoftware.programmingquote.network.author.AuthorResponse
 
 @JsonClass(generateAdapter = true)
-data class QuoteListResponse(
+data class QuoteAuthorResponse(
     val author: AuthorResponse,
-    val quotes: List<QuoteResponse>
+    val quote: QuoteResponse
 )

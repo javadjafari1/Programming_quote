@@ -2,6 +2,7 @@ package ir.partsoftware.programmingquote.ui.screens.authorslist
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -47,7 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ir.partsoftware.programmingquote.R
-import ir.partsoftware.programmingquote.network.author.Author
+import ir.partsoftware.programmingquote.database.author.AuthorEntity
 import ir.partsoftware.programmingquote.ui.common.AuthorItem
 import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.Result
@@ -108,10 +109,14 @@ fun AuthorsListScreen(
                 val result = scaffoldState.snackbarHostState.showSnackbar(
                     message = authorResult.message,
                     actionLabel = context.getString(R.string.label_retry),
-                    duration = SnackbarDuration.Indefinite
+                    duration = if (authors.isNotEmpty()) {
+                        SnackbarDuration.Long
+                    } else {
+                        SnackbarDuration.Indefinite
+                    }
                 )
                 if (result == SnackbarResult.ActionPerformed) {
-                    viewModel.getAuthors()
+                    viewModel.fetchAuthors()
                 }
             }
         }.launchIn(this)
@@ -156,7 +161,7 @@ private fun ScreenContent(
     generateRandom: () -> Unit,
     scaffoldState: ScaffoldState,
     randomResult: Result,
-    authors: List<Author>,
+    authors: List<AuthorEntity>,
     authorResult: Result,
 ) {
     Scaffold(
@@ -210,27 +215,29 @@ private fun ScreenContent(
         },
         floatingActionButtonPosition = FabPosition.Center,
     ) { paddingValues ->
-        if (authorResult is Result.Loading) {
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-        LazyColumn(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(authors) { author ->
-                AuthorItem(
-                    authorName = author.name,
-                    quotesCount = author.quoteCount,
-                    authorImage = author.image,
-                    onItemClick = {
-                        onAuthorClicked(author.id, author.name)
-                    }
+        Box(modifier = Modifier.padding(paddingValues)) {
+            if (authorResult is Result.Loading) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth()
                 )
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(authors) { author ->
+                    AuthorItem(
+                        authorName = author.name,
+                        quotesCount = author.quoteCount,
+                        authorImage = author.image,
+                        onItemClick = {
+                            onAuthorClicked(author.id, author.name)
+                        }
+                    )
+                }
             }
         }
     }

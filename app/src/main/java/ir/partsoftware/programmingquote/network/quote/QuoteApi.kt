@@ -8,7 +8,7 @@ import retrofit2.http.Query
 interface QuoteApi {
 
     @GET("v1/quote/random")
-    suspend fun getRandomQuote(): Response<QuoteResponse>
+    suspend fun getRandomQuote(): Response<QuoteAuthorResponse>
 
     @GET("v1/quote")
     suspend fun getAuthorQuotes(
@@ -18,5 +18,5 @@ interface QuoteApi {
     @GET("v1/quote/{id}")
     suspend fun getQuoteById(
         @Path("id") quoteId: String
-    ): Response<QuoteResponse>
+    ): Response<QuoteAuthorResponse>
 }

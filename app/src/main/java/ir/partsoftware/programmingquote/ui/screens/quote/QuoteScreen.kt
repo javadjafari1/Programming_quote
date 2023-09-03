@@ -50,7 +50,7 @@ fun QuoteScreen(
     val scaffoldState = rememberScaffoldState()
 
     val quoteResult by viewModel.quoteResult.collectAsState(Result.Idle)
-    val quote by viewModel.quote.collectAsState()
+    val quoteWithAuthor by viewModel.quoteWithAuthor.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.quoteResult.onEach { quoteResult ->
@@ -58,10 +58,10 @@ fun QuoteScreen(
                 val result = scaffoldState.snackbarHostState.showSnackbar(
                     quoteResult.message,
                     actionLabel = context.getString(R.string.label_retry),
-                    duration = SnackbarDuration.Indefinite
+                    duration = SnackbarDuration.Long
                 )
                 if (result == SnackbarResult.ActionPerformed) {
-                    viewModel.getQuote(id)
+                    viewModel.fetchQuote(id)
                 }
             }
         }.launchIn(this)
@@ -82,14 +82,14 @@ fun QuoteScreen(
         ScreenContent(
             modifier = Modifier.padding(it),
             onShareClicked = {
-                context.shareText(quote?.quote?.text.orEmpty())
+                context.shareText(quoteWithAuthor?.quote?.text.orEmpty())
             },
             onOpenWikipediaClicked = {
-                context.openUrl(quote?.author?.infoUrl.orEmpty())
+                context.openUrl(quoteWithAuthor?.author?.infoUrl.orEmpty())
             },
-            quote = quote?.quote?.text,
+            quote = quoteWithAuthor?.quote?.text,
             quoteResult = quoteResult,
-            showWikiLink = !quote?.author?.infoUrl.isNullOrBlank()
+            showWikiLink = !quoteWithAuthor?.author?.infoUrl.isNullOrBlank()
         )
     }
 }
@@ -110,15 +110,11 @@ private fun ScreenContent(
             .padding(16.dp)
     ) {
 
-        if (quoteResult is Result.Loading) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        }
-
         if (quote != null) {
             AutoResizeText(
                 modifier = Modifier
                     .weight(1f),
-                text = quote.orEmpty(),
+                text = quote,
                 style = MaterialTheme.typography.h1,
                 color = MaterialTheme.colors.onBackground
             )
@@ -155,6 +151,9 @@ private fun ScreenContent(
                 }
             }
         }
+    }
+    if (quoteResult is Result.Loading) {
+        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
     }
 }
 
