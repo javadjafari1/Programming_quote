@@ -47,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ir.partsoftware.programmingquote.R
+import ir.partsoftware.programmingquote.database.entity.AuthorEntity
 import ir.partsoftware.programmingquote.network.author.Author
 import ir.partsoftware.programmingquote.ui.common.AuthorItem
 import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
@@ -111,7 +112,7 @@ fun AuthorsListScreen(
                     duration = SnackbarDuration.Indefinite
                 )
                 if (result == SnackbarResult.ActionPerformed) {
-                    viewModel.getAuthors()
+                    viewModel.fetchAuthors()
                 }
             }
         }.launchIn(this)
@@ -156,7 +157,7 @@ private fun ScreenContent(
     generateRandom: () -> Unit,
     scaffoldState: ScaffoldState,
     randomResult: Result,
-    authors: List<Author>,
+    authors: List<AuthorEntity>,
     authorResult: Result,
 ) {
     Scaffold(
@@ -210,11 +211,7 @@ private fun ScreenContent(
         },
         floatingActionButtonPosition = FabPosition.Center,
     ) { paddingValues ->
-        if (authorResult is Result.Loading) {
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
@@ -232,6 +229,11 @@ private fun ScreenContent(
                     }
                 )
             }
+        }
+        if (authorResult is Result.Loading) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }

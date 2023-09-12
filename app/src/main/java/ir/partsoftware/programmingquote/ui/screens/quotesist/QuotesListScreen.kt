@@ -54,6 +54,7 @@ import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import ir.partsoftware.programmingquote.R
+import ir.partsoftware.programmingquote.database.entity.QuoteEntity
 import ir.partsoftware.programmingquote.network.quote.Quote
 import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.QuoteItem
@@ -96,7 +97,7 @@ fun QuotesListScreen(
                     duration = SnackbarDuration.Indefinite
                 )
                 if (result == SnackbarResult.ActionPerformed) {
-                    viewModel.getAuthorQuote(authorId)
+                    viewModel.fetchAuthorQuote(authorId)
                 }
             }
         }.launchIn(this)
@@ -229,13 +230,8 @@ private fun ScreenContent(
     modifier: Modifier = Modifier,
     onQuoteClicked: (String) -> Unit,
     quoteResult: Result,
-    quotes: List<Quote>
+    quotes: List<QuoteEntity>
 ) {
-    if (quoteResult is Result.Loading) {
-        LinearProgressIndicator(
-            modifier = modifier.fillMaxWidth()
-        )
-    }
     LazyColumn(
         modifier = modifier
             .padding(horizontal = 16.dp),
@@ -249,6 +245,11 @@ private fun ScreenContent(
                 }
             )
         }
+    }
+    if (quoteResult is Result.Loading) {
+        LinearProgressIndicator(
+            modifier = modifier.fillMaxWidth()
+        )
     }
 }
 

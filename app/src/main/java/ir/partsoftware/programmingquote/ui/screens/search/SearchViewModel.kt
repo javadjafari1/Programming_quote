@@ -5,8 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.partsoftware.programmingquote.network.author.Author
 import ir.partsoftware.programmingquote.network.common.safeApi
-import ir.partsoftware.programmingquote.network.quote.Quote
-import ir.partsoftware.programmingquote.network.quote.QuoteResponse
+import ir.partsoftware.programmingquote.network.quote.QuoteWithAuthorResponse
 import ir.partsoftware.programmingquote.network.search.SearchApi
 import ir.partsoftware.programmingquote.ui.common.Result
 import kotlinx.coroutines.Dispatchers
@@ -27,8 +26,8 @@ class SearchViewModel @Inject constructor(
     private val _searchResult = MutableStateFlow<Result>(Result.Idle)
     val searchResult: SharedFlow<Result> = _searchResult.asSharedFlow()
 
-    private val _quotes = MutableStateFlow<List<QuoteResponse>>(emptyList())
-    val quotes: StateFlow<List<QuoteResponse>> = _quotes.asStateFlow()
+    private val _quotes = MutableStateFlow<List<QuoteWithAuthorResponse>>(emptyList())
+    val quotes: StateFlow<List<QuoteWithAuthorResponse>> = _quotes.asStateFlow()
 
     private val _authors = MutableStateFlow<List<Author>>(emptyList())
     val authors: StateFlow<List<Author>> = _authors.asStateFlow()

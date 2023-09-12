@@ -14,7 +14,7 @@ suspend fun <T> safeApi(
 ): Flow<Result> {
     return flow {
         emit(Result.Loading)
-
+        kotlinx.coroutines.delay(2000)
         try {
             val response = call()
             if (response.isSuccessful) {

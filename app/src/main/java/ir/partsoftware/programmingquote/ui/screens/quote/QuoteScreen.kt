@@ -51,6 +51,7 @@ fun QuoteScreen(
 
     val quoteResult by viewModel.quoteResult.collectAsState(Result.Idle)
     val quote by viewModel.quote.collectAsState()
+    val author by viewModel.author.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.quoteResult.onEach { quoteResult ->
@@ -61,7 +62,7 @@ fun QuoteScreen(
                     duration = SnackbarDuration.Indefinite
                 )
                 if (result == SnackbarResult.ActionPerformed) {
-                    viewModel.getQuote(id)
+                    viewModel.fetchQuote(id)
                 }
             }
         }.launchIn(this)
@@ -82,14 +83,14 @@ fun QuoteScreen(
         ScreenContent(
             modifier = Modifier.padding(it),
             onShareClicked = {
-                context.shareText(quote?.quote?.text.orEmpty())
+                context.shareText(quote?.text.orEmpty())
             },
             onOpenWikipediaClicked = {
-                context.openUrl(quote?.author?.infoUrl.orEmpty())
+                context.openUrl(author?.infoUrl.orEmpty())
             },
-            quote = quote?.quote?.text,
+            quote = quote?.text,
             quoteResult = quoteResult,
-            showWikiLink = !quote?.author?.infoUrl.isNullOrBlank()
+            showWikiLink = !author?.infoUrl.isNullOrBlank()
         )
     }
 }
