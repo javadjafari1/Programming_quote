@@ -1,5 +1,7 @@
 # Programming Quote
 
+![App Icon](app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp)
+
 Discover the wisdom, humor, and insights of the programming world with **Programming Quote**. This Android app is your gateway to a treasure trove of quotes from legendary programmers, developers, and tech visionaries. Dive into a collection of thought-provoking, humorous, and inspiring quotes that reflect the essence of the programming universe.
 
 ## Features:
