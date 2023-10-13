@@ -1,5 +1,6 @@
 package ir.partsoftware.programmingquote.ui.screens.quote
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,6 +19,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,6 +42,14 @@ class QuoteViewModel @Inject constructor(
     init {
         observeQuote(id)
         fetchQuote(id)
+
+        viewModelScope.launch {
+            quoteResult
+                .filter { it is Result.Error }
+                .collectLatest {
+                    Log.e("${this@QuoteViewModel::class.simpleName}", "$it")
+                }
+        }
     }
 
     private fun observeQuote(id: String) {

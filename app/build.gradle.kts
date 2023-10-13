@@ -1,14 +1,23 @@
+import org.jetbrains.kotlin.konan.properties.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("dagger.hilt.android.plugin")
-    id("org.jetbrains.kotlin.kapt")
     id("com.google.devtools.ksp")
 }
 
 android {
     namespace = "ir.partsoftware.programmingquote"
     compileSdk = 34
+
+    val properties = Properties()
+    val propertiesExist = rootProject.file("local.properties").exists()
+    if (propertiesExist) {
+        properties.load(
+            project.rootProject.file("local.properties").inputStream()
+        )
+    }
 
     defaultConfig {
         applicationId = "ir.partsoftware.programmingquote"
@@ -21,6 +30,17 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        val url = if (propertiesExist) {
+            properties.getProperty("serverUrl")
+        } else {
+            "PASTE_YOUR_URL_HERE"
+        }
+        buildConfigField(
+            type = "String",
+            value = "\"$url\"",
+            name = "SERVER_URL",
+        )
     }
 
     buildTypes {
@@ -71,7 +91,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     implementation("com.google.dagger:hilt-android:2.48.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.48.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.48.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

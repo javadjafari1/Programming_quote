@@ -1,5 +1,6 @@
-package ir.partsoftware.programmingquote.ui.screens.quotesist
+package ir.partsoftware.programmingquote.ui.screens.quotelist
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,6 +45,14 @@ class QuotesListViewModel @Inject constructor(
     init {
         observeAuthorQuotes(authorId)
         fetchAuthorQuotes(authorId)
+
+        viewModelScope.launch {
+            quoteResult
+                .filter { it is Result.Error }
+                .collectLatest {
+                    Log.e("${this@QuotesListViewModel::class.simpleName}", "$it")
+                }
+        }
     }
 
     private fun observeAuthorQuotes(authorId: String) {
@@ -56,9 +67,9 @@ class QuotesListViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             safeApi(
                 call = { quoteApi.getAuthorQuotes(authorId) },
-                onDataReady = {
-                    val quoteEntities = it.quotes.map { it.toQuoteEntity() }
-                    val authorEntity = it.author.toAuthorEntity()
+                onDataReady = { response ->
+                    val quoteEntities = response.quotes.map { it.toQuoteEntity() }
+                    val authorEntity = response.author.toAuthorEntity()
                     _author.value = authorEntity
                     _quotes.value = quoteEntities
                     storeQuotes(quoteEntities)

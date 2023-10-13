@@ -52,7 +52,7 @@ fun PQuoteChipPreview() {
                 Text(text = "Programmer")
             }
             PQuotesChip(selected = false, onClick = { /*TODO*/ }) {
-                Text(text = "Programmer")
+                Text(text = "Quote")
             }
         }
     }

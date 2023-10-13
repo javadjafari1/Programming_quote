@@ -36,11 +36,18 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -54,8 +61,6 @@ import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -86,40 +91,43 @@ fun AuthorsListScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.randomResult.collectLatest { result ->
-            when (result) {
-                is Result.Error -> {
-                    scaffoldState.snackbarHostState.showSnackbar(result.message)
-                }
+        launch {
+            viewModel.randomResult.collectLatest { result ->
+                when (result) {
+                    is Result.Error -> {
+                        scaffoldState.snackbarHostState.showSnackbar(result.message)
+                    }
 
-                Result.Idle,
-                Result.Loading -> {
-                }
+                    Result.Success -> {
+                        bottomSheetState.show()
+                    }
 
-                Result.Success -> {
-                    bottomSheetState.show()
+                    Result.Idle,
+                    Result.Loading -> {
+                    }
+
                 }
             }
         }
-    }
 
-    LaunchedEffect(Unit) {
-        viewModel.authorResult.onEach { authorResult ->
-            if (authorResult is Result.Error) {
-                val result = scaffoldState.snackbarHostState.showSnackbar(
-                    message = authorResult.message,
-                    actionLabel = context.getString(R.string.label_retry),
-                    duration = if (authors.isNotEmpty()) {
-                        SnackbarDuration.Long
-                    } else {
-                        SnackbarDuration.Indefinite
+        launch {
+            viewModel.authorResult.collectLatest { authorResult ->
+                if (authorResult is Result.Error) {
+                    val result = scaffoldState.snackbarHostState.showSnackbar(
+                        message = authorResult.message,
+                        actionLabel = context.getString(R.string.label_retry),
+                        duration = if (authors.isNotEmpty()) {
+                            SnackbarDuration.Long
+                        } else {
+                            SnackbarDuration.Indefinite
+                        }
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.fetchAuthors()
                     }
-                )
-                if (result == SnackbarResult.ActionPerformed) {
-                    viewModel.fetchAuthors()
                 }
             }
-        }.launchIn(this)
+        }
     }
 
     ModalBottomSheetLayout(
@@ -156,14 +164,19 @@ fun AuthorsListScreen(
 
 @Composable
 private fun ScreenContent(
-    openSearch: () -> Unit,
-    onAuthorClicked: (id: String, name: String) -> Unit,
-    generateRandom: () -> Unit,
     scaffoldState: ScaffoldState,
-    randomResult: Result,
     authors: List<AuthorEntity>,
     authorResult: Result,
+    randomResult: Result,
+    openSearch: () -> Unit,
+    generateRandom: () -> Unit,
+    onAuthorClicked: (id: String, name: String) -> Unit,
 ) {
+    val density = LocalDensity.current
+    var fabHeight by rememberSaveable { mutableIntStateOf(0) }
+    val fabHeightInDp by remember(fabHeight) {
+        derivedStateOf { with(density) { fabHeight.toDp() + 32.dp } }
+    }
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -176,9 +189,7 @@ private fun ScreenContent(
                     )
                 },
                 actions = {
-                    IconButton(
-                        onClick = openSearch
-                    ) {
+                    IconButton(onClick = openSearch) {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "search-icon"
@@ -196,6 +207,9 @@ private fun ScreenContent(
         },
         floatingActionButton = {
             Button(
+                modifier = Modifier.onGloballyPositioned {
+                    fabHeight = it.size.height
+                },
                 onClick = generateRandom,
                 enabled = randomResult !is Result.Loading,
                 colors = ButtonDefaults.buttonColors(
@@ -225,7 +239,11 @@ private fun ScreenContent(
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    bottom = fabHeightInDp
+                ),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(authors) { author ->
@@ -247,7 +265,10 @@ private fun ScreenContent(
 @Composable
 private fun AuthorsListPreview() {
     ProgrammingQuoteTheme {
-        AuthorsListScreen(onAuthorClicked = { _, _ -> }, openSearch = {})
+        AuthorsListScreen(
+            onAuthorClicked = { _, _ -> },
+            openSearch = {}
+        )
     }
 }
 

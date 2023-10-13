@@ -1,4 +1,4 @@
-package ir.partsoftware.programmingquote.ui.screens.quotesist
+package ir.partsoftware.programmingquote.ui.screens.quotelist
 
 import android.widget.TextView
 import androidx.activity.compose.BackHandler
@@ -38,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,8 +60,7 @@ import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.QuoteItem
 import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun QuotesListScreen(
@@ -69,8 +69,8 @@ fun QuotesListScreen(
     onQuoteClicked: (String) -> Unit,
     viewModel: QuotesListViewModel = hiltViewModel()
 ) {
-    var isFullImageShowing by remember { mutableStateOf(false) }
-    var isInfoDialogShowing by remember { mutableStateOf(false) }
+    var isFullImageShowing by rememberSaveable { mutableStateOf(false) }
+    var isInfoDialogShowing by rememberSaveable { mutableStateOf(false) }
 
     val quoteResult by viewModel.quoteResult.collectAsState(Result.Idle)
     val author by viewModel.author.collectAsState()
@@ -83,12 +83,8 @@ fun QuotesListScreen(
         isFullImageShowing = false
     }
 
-    BackHandler(isFullImageShowing) {
-        isFullImageShowing = false
-    }
-
     LaunchedEffect(Unit) {
-        viewModel.quoteResult.onEach { quoteResult ->
+        viewModel.quoteResult.collectLatest { quoteResult ->
             if (quoteResult is Result.Error) {
                 val result = scaffoldState.snackbarHostState.showSnackbar(
                     quoteResult.message,
@@ -103,7 +99,7 @@ fun QuotesListScreen(
                     viewModel.fetchAuthorQuotes(authorId)
                 }
             }
-        }.launchIn(this)
+        }
     }
 
     Scaffold(
@@ -166,15 +162,15 @@ fun QuotesListScreen(
                         )
                 ) {
                     AsyncImage(
-                        model = author?.image.orEmpty(),
-                        error = painterResource(R.drawable.ic_profile),
-                        contentDescription = "$authorName's image",
-                        contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .align(Alignment.Center)
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .clip(MaterialTheme.shapes.large),
+                        model = author?.image.orEmpty(),
+                        error = painterResource(R.drawable.ic_profile),
+                        contentDescription = "$authorName's image",
+                        contentScale = ContentScale.Fit,
                     )
                 }
             }
@@ -186,8 +182,6 @@ fun QuotesListScreen(
                         about = extract,
                         onDismiss = { isInfoDialogShowing = false }
                     )
-                } else {
-                    isInfoDialogShowing = false
                 }
             }
         }
@@ -210,21 +204,20 @@ private fun AuthorDetailDialog(
                 )
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
-
         ) {
             Text(
+                modifier = Modifier.padding(top = 24.dp),
                 text = name,
                 style = MaterialTheme.typography.subtitle1,
-                color = MaterialTheme.colors.primary,
-                modifier = Modifier.padding(top = 24.dp)
+                color = MaterialTheme.colors.primary
             )
             Spacer(modifier = Modifier.size(16.dp))
             AndroidView(
+                modifier = Modifier.padding(bottom = 24.dp),
                 factory = { context -> TextView(context) },
                 update = {
                     it.text = HtmlCompat.fromHtml(about, HtmlCompat.FROM_HTML_MODE_COMPACT)
-                },
-                modifier = Modifier.padding(bottom = 24.dp)
+                }
             )
         }
     }
@@ -232,10 +225,10 @@ private fun AuthorDetailDialog(
 
 @Composable
 private fun ScreenContent(
-    modifier: Modifier = Modifier,
-    onQuoteClicked: (String) -> Unit,
     quoteResult: Result,
-    quotes: List<QuoteEntity>
+    quotes: List<QuoteEntity>,
+    modifier: Modifier = Modifier,
+    onQuoteClicked: (String) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (quoteResult is Result.Loading) {
@@ -265,7 +258,11 @@ private fun ScreenContent(
 @Composable
 fun QuoteListScreenPreview() {
     ProgrammingQuoteTheme {
-        QuotesListScreen(authorId = "asdklav45", authorName = "Javad jafari", onQuoteClicked = {})
+        QuotesListScreen(
+            authorId = "asdklav45",
+            authorName = "Javad jafari",
+            onQuoteClicked = {}
+        )
     }
 }
 
@@ -275,7 +272,8 @@ fun AuthorDetailDialogPreview() {
     ProgrammingQuoteTheme {
         AuthorDetailDialog(
             name = "javad jafari",
-            about = LoremIpsum(30).values.joinToString()
-        ) {}
+            about = LoremIpsum(30).values.joinToString(),
+            onDismiss = {}
+        )
     }
 }

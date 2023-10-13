@@ -29,7 +29,9 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -46,8 +48,7 @@ import ir.partsoftware.programmingquote.ui.common.PQuotesChip
 import ir.partsoftware.programmingquote.ui.common.QuoteItem
 import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -71,7 +72,7 @@ fun SearchScreen(
     val searchResult by viewModel.searchResult.collectAsState(Result.Idle)
 
     LaunchedEffect(Unit) {
-        viewModel.searchResult.onEach { searchResult ->
+        viewModel.searchResult.collectLatest { searchResult ->
             if (searchResult is Result.Loading) {
                 scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
             }
@@ -85,7 +86,7 @@ fun SearchScreen(
                     viewModel.search()
                 }
             }
-        }.launchIn(this)
+        }
     }
 
     Scaffold(scaffoldState = scaffoldState) { paddingValues ->
@@ -159,11 +160,23 @@ fun SearchScreen(
                 if (searchResult is Result.Loading) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 } else {
-                    val noResult = hasNoResult(
-                        items = if (page == SearchType.Programmer.ordinal) authors else quotes,
-                        searchText = searchText,
-                        searchResult = searchResult
-                    )
+                    val currentList by remember(page, authors, quotes) {
+                        derivedStateOf {
+                            if (page == SearchType.Programmer.ordinal)
+                                authors
+                            else
+                                quotes
+                        }
+                    }
+                    val noResult by remember(
+                        key1 = searchResult,
+                        key2 = searchText,
+                        key3 = currentList
+                    ) {
+                        derivedStateOf {
+                            currentList.isEmpty() && searchText.isNotEmpty() && searchResult is Result.Success
+                        }
+                    }
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(horizontal = 16.dp),
@@ -212,12 +225,6 @@ fun SearchScreen(
         }
     }
 }
-
-private fun hasNoResult(
-    items: List<Any>,
-    searchText: String,
-    searchResult: Result
-) = items.isEmpty() && searchText.isNotEmpty() && searchResult is Result.Success
 
 @Preview
 @Composable
