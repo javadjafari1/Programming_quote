@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">programming Quote</string>
+    <string name="app_name">Programming Quote</string>
     <string name="label_generate_random">Generate Random</string>
     <string name="app_name_short">P.Quotes</string>
     <string name="quotes_count">%s Quotes</string>
