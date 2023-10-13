@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.Button
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -35,9 +36,7 @@ import ir.partsoftware.programmingquote.ui.common.AutoResizeText
 import ir.partsoftware.programmingquote.ui.common.PQuoteAppBar
 import ir.partsoftware.programmingquote.ui.common.Result
 import ir.partsoftware.programmingquote.ui.theme.ProgrammingQuoteTheme
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun QuoteScreen(
@@ -53,7 +52,7 @@ fun QuoteScreen(
     val quoteWithAuthor by viewModel.quoteWithAuthor.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.quoteResult.onEach { quoteResult ->
+        viewModel.quoteResult.collectLatest { quoteResult ->
             if (quoteResult is Result.Error) {
                 val result = scaffoldState.snackbarHostState.showSnackbar(
                     quoteResult.message,
@@ -64,10 +63,11 @@ fun QuoteScreen(
                     viewModel.fetchQuote(id)
                 }
             }
-        }.launchIn(this)
+        }
     }
 
     Scaffold(
+        modifier = Modifier.statusBarsPadding(),
         scaffoldState = scaffoldState,
         topBar = {
             PQuoteAppBar {
@@ -96,12 +96,12 @@ fun QuoteScreen(
 
 @Composable
 private fun ScreenContent(
-    modifier: Modifier = Modifier,
-    onShareClicked: () -> Unit,
-    onOpenWikipediaClicked: () -> Unit,
     quote: String?,
     quoteResult: Result,
-    showWikiLink: Boolean
+    showWikiLink: Boolean,
+    modifier: Modifier = Modifier,
+    onShareClicked: () -> Unit,
+    onOpenWikipediaClicked: () -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
@@ -161,6 +161,9 @@ private fun ScreenContent(
 @Composable
 fun QuoteScreenPreview() {
     ProgrammingQuoteTheme {
-        QuoteScreen(id = "4hgx2bpl4qyhql5", authorName = "Javad jafari")
+        QuoteScreen(
+            id = "4hgx2bpl4qyhql5",
+            authorName = "Javad jafari"
+        )
     }
 }

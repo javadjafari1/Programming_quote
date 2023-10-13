@@ -14,6 +14,9 @@ interface QuoteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertQuotes(quotes: List<QuoteEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertQuote(quote: QuoteEntity)
+
     @Update
     suspend fun updateQuote(quote: QuoteEntity)
 

@@ -1,5 +1,6 @@
 package ir.partsoftware.programmingquote.ui.screens.search
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +16,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,10 +35,20 @@ class SearchViewModel @Inject constructor(
     private val _authors = MutableStateFlow<List<AuthorResponse>>(emptyList())
     val authors: StateFlow<List<AuthorResponse>> = _authors.asStateFlow()
 
-    private val _query = MutableStateFlow<String>("")
+    private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
 
     private var searchJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            searchResult
+                .filter { it is Result.Error }
+                .collectLatest {
+                    Log.e("${this@SearchViewModel::class.simpleName}", "$it")
+                }
+        }
+    }
 
     fun search() {
         searchJob?.cancel()
@@ -44,7 +57,7 @@ class SearchViewModel @Inject constructor(
             safeApi(
                 call = { searchApi.search(query.value) },
                 onDataReady = {
-                    _authors.value = it.authorResponses
+                    _authors.value = it.authors
                     _quotes.value = it.quotes
                 }
             ).collect(_searchResult)

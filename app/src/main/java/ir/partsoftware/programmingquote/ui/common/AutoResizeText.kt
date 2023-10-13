@@ -3,7 +3,12 @@ package ir.partsoftware.programmingquote.ui.common
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
@@ -20,7 +25,7 @@ fun AutoResizeText(
     color: Color = Color.Unspecified
 ) {
     var textStyle by remember { mutableStateOf(style.copy(fontSize = 100.sp)) }
-    var readyToDraw by remember { mutableStateOf(false) }
+    var readyToDraw by rememberSaveable { mutableStateOf(false) }
     Text(
         modifier = modifier
             .padding(horizontal = 16.dp)

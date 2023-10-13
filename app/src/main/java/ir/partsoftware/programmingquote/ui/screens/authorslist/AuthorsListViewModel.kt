@@ -1,5 +1,6 @@
 package ir.partsoftware.programmingquote.ui.screens.authorslist
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +18,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,6 +45,21 @@ class AuthorsListViewModel @Inject constructor(
     init {
         observeAuthors()
         fetchAuthors()
+
+        viewModelScope.launch {
+            authorResult
+                .filter { it is Result.Error }
+                .collectLatest {
+                    Log.e("${this@AuthorsListViewModel::class.simpleName}", "$it")
+                }
+        }
+        viewModelScope.launch {
+            randomResult
+                .filter { it is Result.Error }
+                .collectLatest {
+                    Log.e("${this@AuthorsListViewModel::class.simpleName}", "$it")
+                }
+        }
     }
 
     private fun observeAuthors() {
@@ -56,7 +74,9 @@ class AuthorsListViewModel @Inject constructor(
             safeApi(
                 call = { authorApi.getAuthors() },
                 onDataReady = {
-                    val authorsEntity = it.map { author -> author.toAuthorEntity() }
+                    val authorsEntity = it.map { author ->
+                        author.toAuthorEntity()
+                    }
                     _authors.value = authorsEntity
                     storeAuthors(authorsEntity)
                 }
