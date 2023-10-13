@@ -61,7 +61,7 @@ fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val searchText by viewModel.query.collectAsState()
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState { 2 }
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -155,7 +155,6 @@ fun SearchScreen(
             }
             HorizontalPager(
                 state = pagerState,
-                pageCount = SearchType.values().size
             ) { page ->
                 if (searchResult is Result.Loading) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
