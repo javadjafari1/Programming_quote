@@ -24,7 +24,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -42,10 +42,31 @@ android {
             name = "SERVER_URL",
         )
     }
+    val securityProperties = Properties()
+    val securityPropertiesExist = rootProject.file("security.properties").exists()
+    val keyStoreFileExist = rootProject.file("PQuote.jks").exists()
+    if (securityPropertiesExist && keyStoreFileExist) {
+        securityProperties.load(
+            project.rootProject.file("security.properties").inputStream()
+        )
+        signingConfigs {
+            create("release") {
+                storeFile = rootProject.file("PQuote.jks")
+                storePassword = securityProperties.getProperty("storePassword")
+                keyAlias = securityProperties.getProperty("alias")
+                keyPassword = securityProperties.getProperty("keyPassword")
+            }
+        }
+    }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
+            if (securityPropertiesExist && keyStoreFileExist) {
+                signingConfig = signingConfigs["release"]
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
