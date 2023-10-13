@@ -78,13 +78,13 @@ class QuoteViewModel @Inject constructor(
 
     private fun storeQuote(quoteEntity: QuoteEntity) {
         viewModelScope.launch {
-            quoteDao.updateQuote(quoteEntity)
+            quoteDao.insertQuote(quoteEntity)
         }
     }
 
     private fun storeAuthor(author: AuthorEntity) {
         viewModelScope.launch {
-            authorDao.updateAuthor(author)
+            authorDao.insertAuthor(author)
         }
     }
 }
